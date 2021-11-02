@@ -1,0 +1,49 @@
+Mon Nov  1 07:20:54 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.57.02    Driver Version: 470.57.02    CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla V100-SXM2...  On   | 00000000:18:00.0 Off |                    0 |
+| N/A   36C    P0    42W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+Master address: localhost
+Master port: 1234
+Number of nodes: 1
+Number of GPUs per node: 1
+Node rank: 0
+Workspace: /project/def-karray/yafathi/MINE/
+Dataset: kitti_raw
+Version: debug
+Extra config: {"training.gpus": "0"}
+default params: ./configs/params_kitti_raw.yaml
+/project/6006191/yafathi/MINE/synthesis_task_kitti.py:554: SyntaxWarning: 'str' object is not callable; perhaps you missed a comma?
+  "epoch [%.3d] step [%d/%d] global_step = %d total_loss = %.4f encoder_lr = %.7f\n"
+Traceback (most recent call last):
+  File "train.py", line 39, in <module>
+    assert k in config, k
+AssertionError: data.val_set_path
+Traceback (most recent call last):
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.8.10/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.8.10/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/distributed/launch.py", line 340, in <module>
+    main()
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/distributed/launch.py", line 326, in main
+    sigkill_handler(signal.SIGTERM, None)  # not coming back
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/distributed/launch.py", line 301, in sigkill_handler
+    raise subprocess.CalledProcessError(returncode=last_return_code, cmd=cmd)
+subprocess.CalledProcessError: Command '['/project/6006191/yafathi/MINE_ENV/bin/python3', '-u', 'train.py', '--local_rank=0', '--config_path', './configs/params_kitti_raw.yaml', '--workspace', '/project/def-karray/yafathi/MINE/', '--version', 'debug', '--extra_config', '{"training.gpus": "0"}']' returned non-zero exit status 1.
+Killing subprocess 150832

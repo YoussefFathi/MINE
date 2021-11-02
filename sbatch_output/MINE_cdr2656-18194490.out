@@ -1,0 +1,1265 @@
+Mon Nov  1 16:43:26 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.57.02    Driver Version: 470.57.02    CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla V100-SXM2...  On   | 00000000:18:00.0 Off |                    0 |
+| N/A   32C    P0    44W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  Tesla V100-SXM2...  On   | 00000000:3B:00.0 Off |                    0 |
+| N/A   29C    P0    41W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   2  Tesla V100-SXM2...  On   | 00000000:86:00.0 Off |                    0 |
+| N/A   30C    P0    42W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   3  Tesla V100-SXM2...  On   | 00000000:AF:00.0 Off |                    0 |
+| N/A   32C    P0    41W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+Master address: localhost
+Master port: 1234
+Number of nodes: 1
+Number of GPUs per node: 4
+Node rank: 0
+Workspace: /project/def-karray/yafathi/MINE/
+Dataset: kitti_raw
+Version: debug
+Extra config: {"training.gpus": "0,1,2,3"}
+default params: ./configs/params_kitti_raw.yaml
+Dumping extra config file...
+[2021-11-01 16:44:12,046 train.py] Training config: {'data.img_h': 128, 'data.img_w': 384, 'data.name': 'kitti_raw', 'data.num_seq_per_gpu': 4, 'data.per_gpu_batch_size': 4, 'data.num_tgt_views': 1, 'data.training_set_path': 'kitti_raw_data', 'data.val_set_path': 'kitti_raw_data', 'data.num_workers': 4, 'lr.backbone_lr': 0.001, 'lr.decay_gamma': 0.1, 'lr.decay_steps': [40, 80, 100], 'lr.decoder_lr': 0.001, 'lr.weight_decay': 4e-05, 'model.backbone_normalization': True, 'model.decoder_normalization': True, 'model.pos_encoding_multires': 10, 'model.imagenet_pretrained': True, 'mpi.disparity_end': 0.001, 'mpi.disparity_start': 0.2, 'mpi.is_bg_depth_inf': False, 'mpi.num_bins_coarse': 32, 'mpi.num_bins_fine': 0, 'mpi.valid_mask_threshold': 2, 'mpi.fix_disparity': False, 'mpi.use_alpha': False, 'loss.smoothness_lambda_v1': 0.0, 'loss.smoothness_gmin': 2.0, 'loss.smoothness_grad_ratio': 0.1, 'loss.smoothness_lambda_v2': 0.01, 'training.epochs': 120, 'training.eval_interval': 2000, 'training.fine_tune': False, 'training.gpus': [0, 1, 2, 3], 'training.pretrained_checkpoint_path': None, 'training.sample_interval': 30, 'training.src_rgb_blending': True, 'training.use_multi_scale': True, 'testing.frames_apart': 'random', 'current_epoch': 0, 'global_rank': 0, 'local_workspace': '/project/def-karray/yafathi/MINE/debug', 'local_rank': 0, 'world_size': 4, 'log_file': '/project/def-karray/yafathi/MINE/debug/training.log'}
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+[2021-11-01 16:44:12,677 nerf_dataset.py] Dataset root: kitti_raw_data, is_validation: False, number of images: 5989
+[2021-11-01 16:44:12,782 nerf_dataset.py] Dataset root: kitti_raw_data, is_validation: True, number of images: 1242
+num_ch_enc= [  64  256  512 1024 2048]
+num_ch_enc= num_ch_enc= [  64  256  512 1024 2048]
+[  64  256  512 1024 2048]
+num_ch_enc= [  64  256  512 1024 2048]
+upconv_4_0 2069 256
+upconv_4_0 2069 upconv_4_0256 
+2069 256
+upconv_4_0 2069 256
+upconv_4_1 1301 256
+upconv_3_0 256 128
+upconv_3_1 661 128
+upconv_2_0 128 64
+upconv_2_1 341 64
+upconv_4_1 1301 256
+upconv_1_0 64 32
+upconv_1_1 117 32
+upconv_0_0 32 16
+upconv_0_1 16 16
+upconv_3_0 256 128
+upconv_4_1 1301 256
+upconv_4_1 1301 256
+upconv_3_0 256 128
+upconv_3_0 256 128
+upconv_3_1 661 128
+upconv_2_0 128 64
+upconv_2_1 upconv_3_1341  66164 
+128
+upconv_1_0 64 32
+upconv_2_0 128 64
+upconv_1_1 117 32
+upconv_0_0 32 16
+upconv_3_1 661 128
+upconv_0_1 16 16
+upconv_2_0 128 64
+upconv_2_1 341 64
+upconv_1_0 64 32
+upconv_1_1 117 32
+upconv_0_0 32 16
+upconv_2_1 341 64
+upconv_0_1 16 16
+upconv_1_0 64 32
+upconv_1_1 117 32
+upconv_0_0 32 16
+upconv_0_1 16 16
+Setting up [LPIPS] perceptual loss: trunk [vgg], v[0.1], spatial [off]
+Loading model from: /project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/lpips/weights/v0.1/vgg.pth
+[2021-11-01 16:44:18,520 utils.py] Not using pre-trained model...
+[W reducer.cpp:1050] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters. This flag results in an extra traversal of the autograd graph every iteration, which can adversely affect performance. If your model indeed never has any unused parameters, consider turning this flag off. Note that this warning may be a false positive your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1050] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters. This flag results in an extra traversal of the autograd graph every iteration, which can adversely affect performance. If your model indeed never has any unused parameters, consider turning this flag off. Note that this warning may be a false positive your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1050] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters. This flag results in an extra traversal of the autograd graph every iteration, which can adversely affect performance. If your model indeed never has any unused parameters, consider turning this flag off. Note that this warning may be a false positive your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1050] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters. This flag results in an extra traversal of the autograd graph every iteration, which can adversely affect performance. If your model indeed never has any unused parameters, consider turning this flag off. Note that this warning may be a false positive your model has flow control causing later iterations to have unused parameters. (function operator())
+[2021-11-01 16:44:44,991 synthesis_task_kitti.py] epoch [001] step [10/374] global_step = 10 total_loss = 3.0396 encoder_lr = 0.0010000
+        src: rgb = 0.1231
+        src: ssim = 0.2690
+        src: smooth = 0.0238
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7287
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:45:03,730 synthesis_task_kitti.py] epoch [001] step [20/374] global_step = 20 total_loss = 2.9953 encoder_lr = 0.0010000
+        src: rgb = 0.1379
+        src: ssim = 0.3378
+        src: smooth = 0.0311
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7294
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:45:22,538 synthesis_task_kitti.py] epoch [001] step [30/374] global_step = 30 total_loss = 3.0729 encoder_lr = 0.0010000
+        src: rgb = 0.1312
+        src: ssim = 0.3167
+        src: smooth = 0.0200
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7342
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:45:40,682 synthesis_task_kitti.py] epoch [001] step [40/374] global_step = 40 total_loss = 2.9595 encoder_lr = 0.0010000
+        src: rgb = 0.1405
+        src: ssim = 0.3252
+        src: smooth = 0.0257
+        tgt: rgb = 0.0029
+        tgt: ssim = 0.7177
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:45:59,145 synthesis_task_kitti.py] epoch [001] step [50/374] global_step = 50 total_loss = 3.0269 encoder_lr = 0.0010000
+        src: rgb = 0.1450
+        src: ssim = 0.3606
+        src: smooth = 0.0288
+        tgt: rgb = 0.0014
+        tgt: ssim = 0.7148
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:46:17,982 synthesis_task_kitti.py] epoch [001] step [60/374] global_step = 60 total_loss = 3.0725 encoder_lr = 0.0010000
+        src: rgb = 0.1513
+        src: ssim = 0.3933
+        src: smooth = 0.0211
+        tgt: rgb = 0.0018
+        tgt: ssim = 0.7326
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:46:36,545 synthesis_task_kitti.py] epoch [001] step [70/374] global_step = 70 total_loss = 3.0222 encoder_lr = 0.0010000
+        src: rgb = 0.1632
+        src: ssim = 0.3884
+        src: smooth = 0.0192
+        tgt: rgb = 0.0024
+        tgt: ssim = 0.7471
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:46:55,172 synthesis_task_kitti.py] epoch [001] step [80/374] global_step = 80 total_loss = 2.8581 encoder_lr = 0.0010000
+        src: rgb = 0.1421
+        src: ssim = 0.3612
+        src: smooth = 0.0226
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7173
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:47:13,429 synthesis_task_kitti.py] epoch [001] step [90/374] global_step = 90 total_loss = 2.8896 encoder_lr = 0.0010000
+        src: rgb = 0.1427
+        src: ssim = 0.3498
+        src: smooth = 0.0284
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6868
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:47:31,923 synthesis_task_kitti.py] epoch [001] step [100/374] global_step = 100 total_loss = 2.9737 encoder_lr = 0.0010000
+        src: rgb = 0.1496
+        src: ssim = 0.3561
+        src: smooth = 0.0221
+        tgt: rgb = 0.0029
+        tgt: ssim = 0.7234
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:47:50,296 synthesis_task_kitti.py] epoch [001] step [110/374] global_step = 110 total_loss = 2.9209 encoder_lr = 0.0010000
+        src: rgb = 0.1576
+        src: ssim = 0.3556
+        src: smooth = 0.0350
+        tgt: rgb = 0.0004
+        tgt: ssim = 0.6946
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:48:09,170 synthesis_task_kitti.py] epoch [001] step [120/374] global_step = 120 total_loss = 2.8025 encoder_lr = 0.0010000
+        src: rgb = 0.1604
+        src: ssim = 0.3952
+        src: smooth = 0.0243
+        tgt: rgb = 0.0021
+        tgt: ssim = 0.6817
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:48:27,656 synthesis_task_kitti.py] epoch [001] step [130/374] global_step = 130 total_loss = 2.8891 encoder_lr = 0.0010000
+        src: rgb = 0.1441
+        src: ssim = 0.3703
+        src: smooth = 0.0294
+        tgt: rgb = 0.0004
+        tgt: ssim = 0.7280
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:48:45,208 synthesis_task_kitti.py] epoch [001] step [140/374] global_step = 140 total_loss = 2.9768 encoder_lr = 0.0010000
+        src: rgb = 0.1558
+        src: ssim = 0.3930
+        src: smooth = 0.0224
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7325
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:49:03,706 synthesis_task_kitti.py] epoch [001] step [150/374] global_step = 150 total_loss = 2.9410 encoder_lr = 0.0010000
+        src: rgb = 0.1457
+        src: ssim = 0.3669
+        src: smooth = 0.0290
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7051
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:49:22,125 synthesis_task_kitti.py] epoch [001] step [160/374] global_step = 160 total_loss = 2.9249 encoder_lr = 0.0010000
+        src: rgb = 0.1254
+        src: ssim = 0.3316
+        src: smooth = 0.0286
+        tgt: rgb = 0.0024
+        tgt: ssim = 0.6914
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:49:41,055 synthesis_task_kitti.py] epoch [001] step [170/374] global_step = 170 total_loss = 2.9360 encoder_lr = 0.0010000
+        src: rgb = 0.1314
+        src: ssim = 0.3617
+        src: smooth = 0.0245
+        tgt: rgb = 0.0032
+        tgt: ssim = 0.7133
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:49:59,688 synthesis_task_kitti.py] epoch [001] step [180/374] global_step = 180 total_loss = 3.1371 encoder_lr = 0.0010000
+        src: rgb = 0.1391
+        src: ssim = 0.3535
+        src: smooth = 0.0236
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7669
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:50:18,416 synthesis_task_kitti.py] epoch [001] step [190/374] global_step = 190 total_loss = 2.9955 encoder_lr = 0.0010000
+        src: rgb = 0.1247
+        src: ssim = 0.3183
+        src: smooth = 0.0321
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7431
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:50:37,042 synthesis_task_kitti.py] epoch [001] step [200/374] global_step = 200 total_loss = 2.8508 encoder_lr = 0.0010000
+        src: rgb = 0.1487
+        src: ssim = 0.3453
+        src: smooth = 0.0249
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6779
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:50:55,962 synthesis_task_kitti.py] epoch [001] step [210/374] global_step = 210 total_loss = 2.8161 encoder_lr = 0.0010000
+        src: rgb = 0.1318
+        src: ssim = 0.3147
+        src: smooth = 0.0251
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6829
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:51:15,191 synthesis_task_kitti.py] epoch [001] step [220/374] global_step = 220 total_loss = 2.8388 encoder_lr = 0.0010000
+        src: rgb = 0.1334
+        src: ssim = 0.3514
+        src: smooth = 0.0274
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7185
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:51:33,382 synthesis_task_kitti.py] epoch [001] step [230/374] global_step = 230 total_loss = 2.8863 encoder_lr = 0.0010000
+        src: rgb = 0.1221
+        src: ssim = 0.3135
+        src: smooth = 0.0331
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6973
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:51:52,185 synthesis_task_kitti.py] epoch [001] step [240/374] global_step = 240 total_loss = 2.3910 encoder_lr = 0.0010000
+        src: rgb = 0.1322
+        src: ssim = 0.3308
+        src: smooth = 0.0217
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6393
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:52:10,813 synthesis_task_kitti.py] epoch [001] step [250/374] global_step = 250 total_loss = 2.7906 encoder_lr = 0.0010000
+        src: rgb = 0.1340
+        src: ssim = 0.3310
+        src: smooth = 0.0183
+        tgt: rgb = 0.0022
+        tgt: ssim = 0.6954
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:52:29,270 synthesis_task_kitti.py] epoch [001] step [260/374] global_step = 260 total_loss = 2.6142 encoder_lr = 0.0010000
+        src: rgb = 0.1350
+        src: ssim = 0.3338
+        src: smooth = 0.0217
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6591
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:52:47,989 synthesis_task_kitti.py] epoch [001] step [270/374] global_step = 270 total_loss = 2.9477 encoder_lr = 0.0010000
+        src: rgb = 0.1440
+        src: ssim = 0.3606
+        src: smooth = 0.0284
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7058
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:53:06,679 synthesis_task_kitti.py] epoch [001] step [280/374] global_step = 280 total_loss = 2.9342 encoder_lr = 0.0010000
+        src: rgb = 0.1456
+        src: ssim = 0.3607
+        src: smooth = 0.0329
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7105
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:53:25,705 synthesis_task_kitti.py] epoch [001] step [290/374] global_step = 290 total_loss = 2.6745 encoder_lr = 0.0010000
+        src: rgb = 0.1371
+        src: ssim = 0.3597
+        src: smooth = 0.0281
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6793
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:53:44,094 synthesis_task_kitti.py] epoch [001] step [300/374] global_step = 300 total_loss = 2.9201 encoder_lr = 0.0010000
+        src: rgb = 0.1391
+        src: ssim = 0.3537
+        src: smooth = 0.0195
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7382
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:54:02,804 synthesis_task_kitti.py] epoch [001] step [310/374] global_step = 310 total_loss = 2.8814 encoder_lr = 0.0010000
+        src: rgb = 0.1336
+        src: ssim = 0.3202
+        src: smooth = 0.0360
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6851
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:54:21,216 synthesis_task_kitti.py] epoch [001] step [320/374] global_step = 320 total_loss = 2.8899 encoder_lr = 0.0010000
+        src: rgb = 0.1451
+        src: ssim = 0.3555
+        src: smooth = 0.0226
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7009
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:54:40,096 synthesis_task_kitti.py] epoch [001] step [330/374] global_step = 330 total_loss = 2.9267 encoder_lr = 0.0010000
+        src: rgb = 0.1265
+        src: ssim = 0.3268
+        src: smooth = 0.0296
+        tgt: rgb = 0.0030
+        tgt: ssim = 0.7104
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:54:58,745 synthesis_task_kitti.py] epoch [001] step [340/374] global_step = 340 total_loss = 2.7775 encoder_lr = 0.0010000
+        src: rgb = 0.1322
+        src: ssim = 0.3197
+        src: smooth = 0.0179
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7159
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:55:17,830 synthesis_task_kitti.py] epoch [001] step [350/374] global_step = 350 total_loss = 2.8434 encoder_lr = 0.0010000
+        src: rgb = 0.1342
+        src: ssim = 0.3342
+        src: smooth = 0.0188
+        tgt: rgb = 0.0035
+        tgt: ssim = 0.7134
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:55:36,326 synthesis_task_kitti.py] epoch [001] step [360/374] global_step = 360 total_loss = 2.8421 encoder_lr = 0.0010000
+        src: rgb = 0.1469
+        src: ssim = 0.3402
+        src: smooth = 0.0175
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7074
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:55:55,234 synthesis_task_kitti.py] epoch [001] step [370/374] global_step = 370 total_loss = 3.0151 encoder_lr = 0.0010000
+        src: rgb = 0.1365
+        src: ssim = 0.3421
+        src: smooth = 0.0203
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7359
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:56:02,539 synthesis_task_kitti.py] Epoch finished, average losses: 
+[2021-11-01 16:56:02,539 synthesis_task_kitti.py]     train_loss 3.015105 (2.899311)
+[2021-11-01 16:56:02,539 synthesis_task_kitti.py]     train_loss_rgb_src 0.136546 (0.139697)
+[2021-11-01 16:56:02,539 synthesis_task_kitti.py]     train_loss_ssim_src 0.342105 (0.345892)
+[2021-11-01 16:56:02,540 synthesis_task_kitti.py]     train_loss_rgb_tgt 0.000000 (0.000775)
+[2021-11-01 16:56:02,540 synthesis_task_kitti.py]     train_loss_ssim_tgt 0.735891 (0.709774)
+[2021-11-01 16:56:02,540 synthesis_task_kitti.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-11-01 16:56:02,540 synthesis_task_kitti.py]     train_psnr_tgt 9.757545 (10.587239)
+[2021-11-01 16:56:21,102 synthesis_task_kitti.py] epoch [002] step [10/374] global_step = 384 total_loss = 2.8447 encoder_lr = 0.0010000
+        src: rgb = 0.1472
+        src: ssim = 0.3675
+        src: smooth = 0.0205
+        tgt: rgb = 0.0028
+        tgt: ssim = 0.6893
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:56:39,392 synthesis_task_kitti.py] epoch [002] step [20/374] global_step = 394 total_loss = 2.9376 encoder_lr = 0.0010000
+        src: rgb = 0.1486
+        src: ssim = 0.3559
+        src: smooth = 0.0211
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7210
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:56:57,605 synthesis_task_kitti.py] epoch [002] step [30/374] global_step = 404 total_loss = 2.9485 encoder_lr = 0.0010000
+        src: rgb = 0.1527
+        src: ssim = 0.3788
+        src: smooth = 0.0308
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7491
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:57:15,872 synthesis_task_kitti.py] epoch [002] step [40/374] global_step = 414 total_loss = 2.7377 encoder_lr = 0.0010000
+        src: rgb = 0.1446
+        src: ssim = 0.3618
+        src: smooth = 0.0246
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6659
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:57:34,225 synthesis_task_kitti.py] epoch [002] step [50/374] global_step = 424 total_loss = 2.6254 encoder_lr = 0.0010000
+        src: rgb = 0.1370
+        src: ssim = 0.3290
+        src: smooth = 0.0198
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6562
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:57:52,730 synthesis_task_kitti.py] epoch [002] step [60/374] global_step = 434 total_loss = 2.9558 encoder_lr = 0.0010000
+        src: rgb = 0.1554
+        src: ssim = 0.3389
+        src: smooth = 0.0223
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7096
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:58:11,167 synthesis_task_kitti.py] epoch [002] step [70/374] global_step = 444 total_loss = 2.9059 encoder_lr = 0.0010000
+        src: rgb = 0.1511
+        src: ssim = 0.3597
+        src: smooth = 0.0205
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6983
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:58:29,724 synthesis_task_kitti.py] epoch [002] step [80/374] global_step = 454 total_loss = 2.7880 encoder_lr = 0.0010000
+        src: rgb = 0.1652
+        src: ssim = 0.4129
+        src: smooth = 0.0357
+        tgt: rgb = 0.0038
+        tgt: ssim = 0.6715
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:58:48,062 synthesis_task_kitti.py] epoch [002] step [90/374] global_step = 464 total_loss = 2.7281 encoder_lr = 0.0010000
+        src: rgb = 0.1249
+        src: ssim = 0.3282
+        src: smooth = 0.0289
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6832
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:59:06,641 synthesis_task_kitti.py] epoch [002] step [100/374] global_step = 474 total_loss = 2.9104 encoder_lr = 0.0010000
+        src: rgb = 0.1397
+        src: ssim = 0.3550
+        src: smooth = 0.0252
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6816
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:59:25,088 synthesis_task_kitti.py] epoch [002] step [110/374] global_step = 484 total_loss = 2.6871 encoder_lr = 0.0010000
+        src: rgb = 0.1309
+        src: ssim = 0.3376
+        src: smooth = 0.0186
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6761
+        tgt: smooth = 0.0000
+
+[2021-11-01 16:59:43,837 synthesis_task_kitti.py] epoch [002] step [120/374] global_step = 494 total_loss = 2.8136 encoder_lr = 0.0010000
+        src: rgb = 0.1350
+        src: ssim = 0.3445
+        src: smooth = 0.0204
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6908
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:00:02,269 synthesis_task_kitti.py] epoch [002] step [130/374] global_step = 504 total_loss = 2.7523 encoder_lr = 0.0010000
+        src: rgb = 0.1553
+        src: ssim = 0.3698
+        src: smooth = 0.0287
+        tgt: rgb = 0.0030
+        tgt: ssim = 0.6453
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:00:20,057 synthesis_task_kitti.py] epoch [002] step [140/374] global_step = 514 total_loss = 2.8466 encoder_lr = 0.0010000
+        src: rgb = 0.1603
+        src: ssim = 0.3676
+        src: smooth = 0.0215
+        tgt: rgb = 0.0031
+        tgt: ssim = 0.6840
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:00:38,717 synthesis_task_kitti.py] epoch [002] step [150/374] global_step = 524 total_loss = 2.8602 encoder_lr = 0.0010000
+        src: rgb = 0.1321
+        src: ssim = 0.3369
+        src: smooth = 0.0223
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6822
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:00:57,420 synthesis_task_kitti.py] epoch [002] step [160/374] global_step = 534 total_loss = 3.0378 encoder_lr = 0.0010000
+        src: rgb = 0.1448
+        src: ssim = 0.3501
+        src: smooth = 0.0249
+        tgt: rgb = 0.0025
+        tgt: ssim = 0.7433
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:01:16,007 synthesis_task_kitti.py] epoch [002] step [170/374] global_step = 544 total_loss = 2.8916 encoder_lr = 0.0010000
+        src: rgb = 0.1425
+        src: ssim = 0.3474
+        src: smooth = 0.0261
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6950
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:01:34,734 synthesis_task_kitti.py] epoch [002] step [180/374] global_step = 554 total_loss = 2.8626 encoder_lr = 0.0010000
+        src: rgb = 0.1575
+        src: ssim = 0.3585
+        src: smooth = 0.0232
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6781
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:01:53,303 synthesis_task_kitti.py] epoch [002] step [190/374] global_step = 564 total_loss = 2.7694 encoder_lr = 0.0010000
+        src: rgb = 0.1354
+        src: ssim = 0.3294
+        src: smooth = 0.0185
+        tgt: rgb = 0.0043
+        tgt: ssim = 0.6782
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:02:12,122 synthesis_task_kitti.py] epoch [002] step [200/374] global_step = 574 total_loss = 2.7559 encoder_lr = 0.0010000
+        src: rgb = 0.1511
+        src: ssim = 0.3739
+        src: smooth = 0.0243
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6915
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:02:30,629 synthesis_task_kitti.py] epoch [002] step [210/374] global_step = 584 total_loss = 2.9320 encoder_lr = 0.0010000
+        src: rgb = 0.1616
+        src: ssim = 0.3530
+        src: smooth = 0.0168
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6974
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:02:49,346 synthesis_task_kitti.py] epoch [002] step [220/374] global_step = 594 total_loss = 2.5774 encoder_lr = 0.0010000
+        src: rgb = 0.1265
+        src: ssim = 0.3424
+        src: smooth = 0.0187
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6702
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:03:07,751 synthesis_task_kitti.py] epoch [002] step [230/374] global_step = 604 total_loss = 2.7823 encoder_lr = 0.0010000
+        src: rgb = 0.1562
+        src: ssim = 0.3826
+        src: smooth = 0.0278
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6634
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:03:26,210 synthesis_task_kitti.py] epoch [002] step [240/374] global_step = 614 total_loss = 2.8785 encoder_lr = 0.0010000
+        src: rgb = 0.1460
+        src: ssim = 0.3569
+        src: smooth = 0.0200
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6977
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:03:44,222 synthesis_task_kitti.py] epoch [002] step [250/374] global_step = 624 total_loss = 2.4565 encoder_lr = 0.0010000
+        src: rgb = 0.1269
+        src: ssim = 0.3068
+        src: smooth = 0.0225
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6371
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:04:02,705 synthesis_task_kitti.py] epoch [002] step [260/374] global_step = 634 total_loss = 2.7319 encoder_lr = 0.0010000
+        src: rgb = 0.1460
+        src: ssim = 0.3540
+        src: smooth = 0.0198
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6951
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:04:21,089 synthesis_task_kitti.py] epoch [002] step [270/374] global_step = 644 total_loss = 3.0276 encoder_lr = 0.0010000
+        src: rgb = 0.1450
+        src: ssim = 0.3642
+        src: smooth = 0.0231
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7476
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:04:39,405 synthesis_task_kitti.py] epoch [002] step [280/374] global_step = 654 total_loss = 3.0618 encoder_lr = 0.0010000
+        src: rgb = 0.1583
+        src: ssim = 0.3926
+        src: smooth = 0.0184
+        tgt: rgb = 0.0011
+        tgt: ssim = 0.7755
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:04:59,576 synthesis_task_kitti.py] epoch [002] step [290/374] global_step = 664 total_loss = 2.8272 encoder_lr = 0.0010000
+        src: rgb = 0.1459
+        src: ssim = 0.3622
+        src: smooth = 0.0214
+        tgt: rgb = 0.0020
+        tgt: ssim = 0.6729
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:05:18,300 synthesis_task_kitti.py] epoch [002] step [300/374] global_step = 674 total_loss = 2.7831 encoder_lr = 0.0010000
+        src: rgb = 0.1503
+        src: ssim = 0.3862
+        src: smooth = 0.0201
+        tgt: rgb = 0.0030
+        tgt: ssim = 0.6921
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:05:37,064 synthesis_task_kitti.py] epoch [002] step [310/374] global_step = 684 total_loss = 2.6402 encoder_lr = 0.0010000
+        src: rgb = 0.1439
+        src: ssim = 0.3590
+        src: smooth = 0.0301
+        tgt: rgb = 0.0029
+        tgt: ssim = 0.6529
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:05:55,453 synthesis_task_kitti.py] epoch [002] step [320/374] global_step = 694 total_loss = 2.7170 encoder_lr = 0.0010000
+        src: rgb = 0.1489
+        src: ssim = 0.3644
+        src: smooth = 0.0257
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6808
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:06:13,925 synthesis_task_kitti.py] epoch [002] step [330/374] global_step = 704 total_loss = 2.8915 encoder_lr = 0.0010000
+        src: rgb = 0.1542
+        src: ssim = 0.3826
+        src: smooth = 0.0224
+        tgt: rgb = 0.0042
+        tgt: ssim = 0.6999
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:06:32,883 synthesis_task_kitti.py] epoch [002] step [340/374] global_step = 714 total_loss = 2.8695 encoder_lr = 0.0010000
+        src: rgb = 0.1516
+        src: ssim = 0.3429
+        src: smooth = 0.0201
+        tgt: rgb = 0.0023
+        tgt: ssim = 0.7261
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:06:51,936 synthesis_task_kitti.py] epoch [002] step [350/374] global_step = 724 total_loss = 2.8184 encoder_lr = 0.0010000
+        src: rgb = 0.1526
+        src: ssim = 0.3305
+        src: smooth = 0.0227
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6796
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:07:10,838 synthesis_task_kitti.py] epoch [002] step [360/374] global_step = 734 total_loss = 2.7639 encoder_lr = 0.0010000
+        src: rgb = 0.1413
+        src: ssim = 0.3560
+        src: smooth = 0.0176
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6806
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:07:30,305 synthesis_task_kitti.py] epoch [002] step [370/374] global_step = 744 total_loss = 2.8649 encoder_lr = 0.0010000
+        src: rgb = 0.1446
+        src: ssim = 0.3386
+        src: smooth = 0.0225
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7317
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:07:37,634 synthesis_task_kitti.py] Epoch finished, average losses: 
+[2021-11-01 17:07:37,634 synthesis_task_kitti.py]     train_loss 2.864917 (2.818459)
+[2021-11-01 17:07:37,635 synthesis_task_kitti.py]     train_loss_rgb_src 0.144619 (0.146247)
+[2021-11-01 17:07:37,635 synthesis_task_kitti.py]     train_loss_ssim_src 0.338650 (0.356174)
+[2021-11-01 17:07:37,635 synthesis_task_kitti.py]     train_loss_rgb_tgt 0.000000 (0.000949)
+[2021-11-01 17:07:37,635 synthesis_task_kitti.py]     train_loss_ssim_tgt 0.731690 (0.691647)
+[2021-11-01 17:07:37,635 synthesis_task_kitti.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-11-01 17:07:37,635 synthesis_task_kitti.py]     train_psnr_tgt 10.937826 (10.593882)
+[2021-11-01 17:07:55,832 synthesis_task_kitti.py] epoch [003] step [10/374] global_step = 758 total_loss = 2.9764 encoder_lr = 0.0010000
+        src: rgb = 0.1596
+        src: ssim = 0.3300
+        src: smooth = 0.0282
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7275
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:08:14,359 synthesis_task_kitti.py] epoch [003] step [20/374] global_step = 768 total_loss = 2.8989 encoder_lr = 0.0010000
+        src: rgb = 0.1524
+        src: ssim = 0.3423
+        src: smooth = 0.0273
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7240
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:08:32,489 synthesis_task_kitti.py] epoch [003] step [30/374] global_step = 778 total_loss = 2.5779 encoder_lr = 0.0010000
+        src: rgb = 0.1192
+        src: ssim = 0.3339
+        src: smooth = 0.0221
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6573
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:08:51,308 synthesis_task_kitti.py] epoch [003] step [40/374] global_step = 788 total_loss = 2.7618 encoder_lr = 0.0010000
+        src: rgb = 0.1260
+        src: ssim = 0.3328
+        src: smooth = 0.0310
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6565
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:09:09,924 synthesis_task_kitti.py] epoch [003] step [50/374] global_step = 798 total_loss = 2.8637 encoder_lr = 0.0010000
+        src: rgb = 0.1538
+        src: ssim = 0.3576
+        src: smooth = 0.0256
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7031
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:09:28,873 synthesis_task_kitti.py] epoch [003] step [60/374] global_step = 808 total_loss = 2.7364 encoder_lr = 0.0010000
+        src: rgb = 0.1388
+        src: ssim = 0.3442
+        src: smooth = 0.0272
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6960
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:09:47,313 synthesis_task_kitti.py] epoch [003] step [70/374] global_step = 818 total_loss = 2.8541 encoder_lr = 0.0010000
+        src: rgb = 0.1502
+        src: ssim = 0.3563
+        src: smooth = 0.0198
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6971
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:10:05,760 synthesis_task_kitti.py] epoch [003] step [80/374] global_step = 828 total_loss = 2.8590 encoder_lr = 0.0010000
+        src: rgb = 0.1403
+        src: ssim = 0.3527
+        src: smooth = 0.0223
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7158
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:10:24,518 synthesis_task_kitti.py] epoch [003] step [90/374] global_step = 838 total_loss = 3.0041 encoder_lr = 0.0010000
+        src: rgb = 0.1516
+        src: ssim = 0.3605
+        src: smooth = 0.0192
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7259
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:10:42,785 synthesis_task_kitti.py] epoch [003] step [100/374] global_step = 848 total_loss = 2.7446 encoder_lr = 0.0010000
+        src: rgb = 0.1309
+        src: ssim = 0.3329
+        src: smooth = 0.0192
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6769
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:11:01,364 synthesis_task_kitti.py] epoch [003] step [110/374] global_step = 858 total_loss = 2.9321 encoder_lr = 0.0010000
+        src: rgb = 0.1427
+        src: ssim = 0.3333
+        src: smooth = 0.0205
+        tgt: rgb = 0.0017
+        tgt: ssim = 0.7180
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:11:19,293 synthesis_task_kitti.py] epoch [003] step [120/374] global_step = 868 total_loss = 2.7971 encoder_lr = 0.0010000
+        src: rgb = 0.1522
+        src: ssim = 0.3458
+        src: smooth = 0.0203
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6685
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:11:37,327 synthesis_task_kitti.py] epoch [003] step [130/374] global_step = 878 total_loss = 2.8300 encoder_lr = 0.0010000
+        src: rgb = 0.1589
+        src: ssim = 0.3469
+        src: smooth = 0.0184
+        tgt: rgb = 0.0004
+        tgt: ssim = 0.7081
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:11:55,654 synthesis_task_kitti.py] epoch [003] step [140/374] global_step = 888 total_loss = 2.8114 encoder_lr = 0.0010000
+        src: rgb = 0.1380
+        src: ssim = 0.3414
+        src: smooth = 0.0186
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7045
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:12:14,092 synthesis_task_kitti.py] epoch [003] step [150/374] global_step = 898 total_loss = 2.8651 encoder_lr = 0.0010000
+        src: rgb = 0.1484
+        src: ssim = 0.3480
+        src: smooth = 0.0164
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6966
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:12:32,946 synthesis_task_kitti.py] epoch [003] step [160/374] global_step = 908 total_loss = 2.8492 encoder_lr = 0.0010000
+        src: rgb = 0.1582
+        src: ssim = 0.3493
+        src: smooth = 0.0226
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6965
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:12:51,484 synthesis_task_kitti.py] epoch [003] step [170/374] global_step = 918 total_loss = 2.8943 encoder_lr = 0.0010000
+        src: rgb = 0.1491
+        src: ssim = 0.3531
+        src: smooth = 0.0243
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7008
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:13:09,875 synthesis_task_kitti.py] epoch [003] step [180/374] global_step = 928 total_loss = 2.8086 encoder_lr = 0.0010000
+        src: rgb = 0.1392
+        src: ssim = 0.3214
+        src: smooth = 0.0185
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6930
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:13:28,340 synthesis_task_kitti.py] epoch [003] step [190/374] global_step = 938 total_loss = 2.9583 encoder_lr = 0.0010000
+        src: rgb = 0.1626
+        src: ssim = 0.3749
+        src: smooth = 0.0236
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7297
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:13:46,620 synthesis_task_kitti.py] epoch [003] step [200/374] global_step = 948 total_loss = 2.6764 encoder_lr = 0.0010000
+        src: rgb = 0.1358
+        src: ssim = 0.3100
+        src: smooth = 0.0171
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6581
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:14:05,323 synthesis_task_kitti.py] epoch [003] step [210/374] global_step = 958 total_loss = 2.8024 encoder_lr = 0.0010000
+        src: rgb = 0.1392
+        src: ssim = 0.3366
+        src: smooth = 0.0225
+        tgt: rgb = 0.0013
+        tgt: ssim = 0.6770
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:14:23,502 synthesis_task_kitti.py] epoch [003] step [220/374] global_step = 968 total_loss = 2.9322 encoder_lr = 0.0010000
+        src: rgb = 0.1413
+        src: ssim = 0.3492
+        src: smooth = 0.0271
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7292
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:14:41,716 synthesis_task_kitti.py] epoch [003] step [230/374] global_step = 978 total_loss = 2.8821 encoder_lr = 0.0010000
+        src: rgb = 0.1465
+        src: ssim = 0.3482
+        src: smooth = 0.0264
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6958
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:15:00,042 synthesis_task_kitti.py] epoch [003] step [240/374] global_step = 988 total_loss = 2.5463 encoder_lr = 0.0010000
+        src: rgb = 0.1475
+        src: ssim = 0.3479
+        src: smooth = 0.0216
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6317
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:15:18,212 synthesis_task_kitti.py] epoch [003] step [250/374] global_step = 998 total_loss = 2.6845 encoder_lr = 0.0010000
+        src: rgb = 0.1435
+        src: ssim = 0.3213
+        src: smooth = 0.0170
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6687
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:15:36,277 synthesis_task_kitti.py] epoch [003] step [260/374] global_step = 1008 total_loss = 2.7270 encoder_lr = 0.0010000
+        src: rgb = 0.1381
+        src: ssim = 0.3366
+        src: smooth = 0.0270
+        tgt: rgb = 0.0018
+        tgt: ssim = 0.6640
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:15:54,533 synthesis_task_kitti.py] epoch [003] step [270/374] global_step = 1018 total_loss = 2.9035 encoder_lr = 0.0010000
+        src: rgb = 0.1439
+        src: ssim = 0.3559
+        src: smooth = 0.0216
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7148
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:16:12,877 synthesis_task_kitti.py] epoch [003] step [280/374] global_step = 1028 total_loss = 3.0370 encoder_lr = 0.0010000
+        src: rgb = 0.1594
+        src: ssim = 0.3495
+        src: smooth = 0.0159
+        tgt: rgb = 0.0023
+        tgt: ssim = 0.7280
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:16:31,201 synthesis_task_kitti.py] epoch [003] step [290/374] global_step = 1038 total_loss = 2.8714 encoder_lr = 0.0010000
+        src: rgb = 0.1477
+        src: ssim = 0.3590
+        src: smooth = 0.0281
+        tgt: rgb = 0.0008
+        tgt: ssim = 0.7119
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:16:50,299 synthesis_task_kitti.py] epoch [003] step [300/374] global_step = 1048 total_loss = 2.7788 encoder_lr = 0.0010000
+        src: rgb = 0.1396
+        src: ssim = 0.3280
+        src: smooth = 0.0248
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6922
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:17:08,697 synthesis_task_kitti.py] epoch [003] step [310/374] global_step = 1058 total_loss = 2.8758 encoder_lr = 0.0010000
+        src: rgb = 0.1268
+        src: ssim = 0.3123
+        src: smooth = 0.0181
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6943
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:17:27,092 synthesis_task_kitti.py] epoch [003] step [320/374] global_step = 1068 total_loss = 2.6625 encoder_lr = 0.0010000
+        src: rgb = 0.1458
+        src: ssim = 0.3623
+        src: smooth = 0.0233
+        tgt: rgb = 0.0019
+        tgt: ssim = 0.6829
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:17:45,810 synthesis_task_kitti.py] epoch [003] step [330/374] global_step = 1078 total_loss = 2.8189 encoder_lr = 0.0010000
+        src: rgb = 0.1415
+        src: ssim = 0.3495
+        src: smooth = 0.0197
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6799
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:18:04,007 synthesis_task_kitti.py] epoch [003] step [340/374] global_step = 1088 total_loss = 2.9840 encoder_lr = 0.0010000
+        src: rgb = 0.1453
+        src: ssim = 0.3630
+        src: smooth = 0.0151
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7530
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:18:22,078 synthesis_task_kitti.py] epoch [003] step [350/374] global_step = 1098 total_loss = 2.8432 encoder_lr = 0.0010000
+        src: rgb = 0.1392
+        src: ssim = 0.3355
+        src: smooth = 0.0201
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6832
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:18:40,391 synthesis_task_kitti.py] epoch [003] step [360/374] global_step = 1108 total_loss = 2.9275 encoder_lr = 0.0010000
+        src: rgb = 0.1559
+        src: ssim = 0.3676
+        src: smooth = 0.0169
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7133
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:18:58,740 synthesis_task_kitti.py] epoch [003] step [370/374] global_step = 1118 total_loss = 2.8391 encoder_lr = 0.0010000
+        src: rgb = 0.1540
+        src: ssim = 0.3422
+        src: smooth = 0.0155
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6728
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:19:06,216 synthesis_task_kitti.py] Epoch finished, average losses: 
+[2021-11-01 17:19:06,216 synthesis_task_kitti.py]     train_loss 2.839138 (2.832849)
+[2021-11-01 17:19:06,216 synthesis_task_kitti.py]     train_loss_rgb_src 0.153980 (0.144940)
+[2021-11-01 17:19:06,217 synthesis_task_kitti.py]     train_loss_ssim_src 0.342155 (0.344115)
+[2021-11-01 17:19:06,217 synthesis_task_kitti.py]     train_loss_rgb_tgt 0.000000 (0.000278)
+[2021-11-01 17:19:06,217 synthesis_task_kitti.py]     train_loss_ssim_tgt 0.672831 (0.695857)
+[2021-11-01 17:19:06,217 synthesis_task_kitti.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-11-01 17:19:06,217 synthesis_task_kitti.py]     train_psnr_tgt 10.861673 (10.646002)
+[2021-11-01 17:19:24,341 synthesis_task_kitti.py] epoch [004] step [10/374] global_step = 1132 total_loss = 2.8685 encoder_lr = 0.0010000
+        src: rgb = 0.1494
+        src: ssim = 0.3489
+        src: smooth = 0.0159
+        tgt: rgb = 0.0025
+        tgt: ssim = 0.7131
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:19:42,970 synthesis_task_kitti.py] epoch [004] step [20/374] global_step = 1142 total_loss = 2.6828 encoder_lr = 0.0010000
+        src: rgb = 0.1368
+        src: ssim = 0.3297
+        src: smooth = 0.0167
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6680
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:20:01,325 synthesis_task_kitti.py] epoch [004] step [30/374] global_step = 1152 total_loss = 2.6164 encoder_lr = 0.0010000
+        src: rgb = 0.1392
+        src: ssim = 0.3509
+        src: smooth = 0.0200
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6619
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:20:19,472 synthesis_task_kitti.py] epoch [004] step [40/374] global_step = 1162 total_loss = 2.7871 encoder_lr = 0.0010000
+        src: rgb = 0.1509
+        src: ssim = 0.3674
+        src: smooth = 0.0199
+        tgt: rgb = 0.0016
+        tgt: ssim = 0.6661
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:20:38,055 synthesis_task_kitti.py] epoch [004] step [50/374] global_step = 1172 total_loss = 2.9542 encoder_lr = 0.0010000
+        src: rgb = 0.1639
+        src: ssim = 0.3417
+        src: smooth = 0.0193
+        tgt: rgb = 0.0037
+        tgt: ssim = 0.7310
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:20:56,328 synthesis_task_kitti.py] epoch [004] step [60/374] global_step = 1182 total_loss = 2.7823 encoder_lr = 0.0010000
+        src: rgb = 0.1598
+        src: ssim = 0.3512
+        src: smooth = 0.0258
+        tgt: rgb = 0.0004
+        tgt: ssim = 0.6954
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:21:14,540 synthesis_task_kitti.py] epoch [004] step [70/374] global_step = 1192 total_loss = 2.9596 encoder_lr = 0.0010000
+        src: rgb = 0.1712
+        src: ssim = 0.3928
+        src: smooth = 0.0203
+        tgt: rgb = 0.0030
+        tgt: ssim = 0.7322
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:21:32,898 synthesis_task_kitti.py] epoch [004] step [80/374] global_step = 1202 total_loss = 2.8278 encoder_lr = 0.0010000
+        src: rgb = 0.1370
+        src: ssim = 0.3247
+        src: smooth = 0.0215
+        tgt: rgb = 0.0007
+        tgt: ssim = 0.6896
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:21:51,234 synthesis_task_kitti.py] epoch [004] step [90/374] global_step = 1212 total_loss = 2.7525 encoder_lr = 0.0010000
+        src: rgb = 0.1325
+        src: ssim = 0.3492
+        src: smooth = 0.0221
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6976
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:22:09,621 synthesis_task_kitti.py] epoch [004] step [100/374] global_step = 1222 total_loss = 2.8441 encoder_lr = 0.0010000
+        src: rgb = 0.1555
+        src: ssim = 0.3515
+        src: smooth = 0.0220
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6778
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:22:28,384 synthesis_task_kitti.py] epoch [004] step [110/374] global_step = 1232 total_loss = 2.6856 encoder_lr = 0.0010000
+        src: rgb = 0.1536
+        src: ssim = 0.3505
+        src: smooth = 0.0185
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6728
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:22:46,799 synthesis_task_kitti.py] epoch [004] step [120/374] global_step = 1242 total_loss = 2.9214 encoder_lr = 0.0010000
+        src: rgb = 0.1491
+        src: ssim = 0.3591
+        src: smooth = 0.0208
+        tgt: rgb = 0.0057
+        tgt: ssim = 0.7163
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:23:05,474 synthesis_task_kitti.py] epoch [004] step [130/374] global_step = 1252 total_loss = 2.6602 encoder_lr = 0.0010000
+        src: rgb = 0.1500
+        src: ssim = 0.3431
+        src: smooth = 0.0250
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6617
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:23:23,716 synthesis_task_kitti.py] epoch [004] step [140/374] global_step = 1262 total_loss = 2.7756 encoder_lr = 0.0010000
+        src: rgb = 0.1534
+        src: ssim = 0.3265
+        src: smooth = 0.0278
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6918
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:23:42,135 synthesis_task_kitti.py] epoch [004] step [150/374] global_step = 1272 total_loss = 2.6814 encoder_lr = 0.0010000
+        src: rgb = 0.1334
+        src: ssim = 0.3150
+        src: smooth = 0.0174
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6458
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:24:00,745 synthesis_task_kitti.py] epoch [004] step [160/374] global_step = 1282 total_loss = 2.8098 encoder_lr = 0.0010000
+        src: rgb = 0.1363
+        src: ssim = 0.3508
+        src: smooth = 0.0203
+        tgt: rgb = 0.0027
+        tgt: ssim = 0.6853
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:24:19,040 synthesis_task_kitti.py] epoch [004] step [170/374] global_step = 1292 total_loss = 2.7787 encoder_lr = 0.0010000
+        src: rgb = 0.1687
+        src: ssim = 0.3429
+        src: smooth = 0.0221
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6529
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:24:37,210 synthesis_task_kitti.py] epoch [004] step [180/374] global_step = 1302 total_loss = 2.8087 encoder_lr = 0.0010000
+        src: rgb = 0.1398
+        src: ssim = 0.3318
+        src: smooth = 0.0215
+        tgt: rgb = 0.0038
+        tgt: ssim = 0.6685
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:24:55,719 synthesis_task_kitti.py] epoch [004] step [190/374] global_step = 1312 total_loss = 2.8665 encoder_lr = 0.0010000
+        src: rgb = 0.1436
+        src: ssim = 0.3764
+        src: smooth = 0.0201
+        tgt: rgb = 0.0004
+        tgt: ssim = 0.7294
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:25:13,701 synthesis_task_kitti.py] epoch [004] step [200/374] global_step = 1322 total_loss = 3.0094 encoder_lr = 0.0010000
+        src: rgb = 0.1573
+        src: ssim = 0.3627
+        src: smooth = 0.0247
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7434
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:25:32,134 synthesis_task_kitti.py] epoch [004] step [210/374] global_step = 1332 total_loss = 2.5500 encoder_lr = 0.0010000
+        src: rgb = 0.1412
+        src: ssim = 0.3482
+        src: smooth = 0.0250
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6330
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:25:50,679 synthesis_task_kitti.py] epoch [004] step [220/374] global_step = 1342 total_loss = 2.5168 encoder_lr = 0.0010000
+        src: rgb = 0.1333
+        src: ssim = 0.3406
+        src: smooth = 0.0181
+        tgt: rgb = 0.0013
+        tgt: ssim = 0.6443
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:26:08,877 synthesis_task_kitti.py] epoch [004] step [230/374] global_step = 1352 total_loss = 2.7884 encoder_lr = 0.0010000
+        src: rgb = 0.1471
+        src: ssim = 0.3527
+        src: smooth = 0.0210
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6723
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:26:27,244 synthesis_task_kitti.py] epoch [004] step [240/374] global_step = 1362 total_loss = 2.7927 encoder_lr = 0.0010000
+        src: rgb = 0.1387
+        src: ssim = 0.3365
+        src: smooth = 0.0140
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6922
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:26:45,673 synthesis_task_kitti.py] epoch [004] step [250/374] global_step = 1372 total_loss = 2.9305 encoder_lr = 0.0010000
+        src: rgb = 0.1442
+        src: ssim = 0.3358
+        src: smooth = 0.0200
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7029
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:27:03,796 synthesis_task_kitti.py] epoch [004] step [260/374] global_step = 1382 total_loss = 2.9520 encoder_lr = 0.0010000
+        src: rgb = 0.1577
+        src: ssim = 0.3855
+        src: smooth = 0.0174
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7226
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:27:22,029 synthesis_task_kitti.py] epoch [004] step [270/374] global_step = 1392 total_loss = 2.9970 encoder_lr = 0.0010000
+        src: rgb = 0.1434
+        src: ssim = 0.3481
+        src: smooth = 0.0244
+        tgt: rgb = 0.0033
+        tgt: ssim = 0.7343
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:27:40,824 synthesis_task_kitti.py] epoch [004] step [280/374] global_step = 1402 total_loss = 2.6240 encoder_lr = 0.0010000
+        src: rgb = 0.1329
+        src: ssim = 0.3082
+        src: smooth = 0.0232
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6316
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:27:59,144 synthesis_task_kitti.py] epoch [004] step [290/374] global_step = 1412 total_loss = 2.9778 encoder_lr = 0.0010000
+        src: rgb = 0.1586
+        src: ssim = 0.3656
+        src: smooth = 0.0242
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7633
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:28:17,432 synthesis_task_kitti.py] epoch [004] step [300/374] global_step = 1422 total_loss = 2.7486 encoder_lr = 0.0010000
+        src: rgb = 0.1391
+        src: ssim = 0.3341
+        src: smooth = 0.0145
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.6963
+        tgt: smooth = 0.0000
+
+[2021-11-01 17:28:35,853 synthesis_task_kitti.py] epoch [004] step [310/374] global_step = 1432 total_loss = 2.8598 encoder_lr = 0.0010000
+        src: rgb = 0.1410
+        src: ssim = 0.3448
+        src: smooth = 0.0147
+        tgt: rgb = 0.0000
+        tgt: ssim = 0.7156
+        tgt: smooth = 0.0000
+

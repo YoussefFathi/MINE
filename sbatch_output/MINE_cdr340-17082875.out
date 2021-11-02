@@ -1,0 +1,140 @@
+Sat Oct 16 16:03:58 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.57.02    Driver Version: 470.57.02    CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla P100-PCIE...  On   | 00000000:04:00.0 Off |                    0 |
+| N/A   34C    P0    23W / 250W |      0MiB / 12198MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  Tesla P100-PCIE...  On   | 00000000:82:00.0 Off |                    0 |
+| N/A   31C    P0    25W / 250W |      0MiB / 12198MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+Master address: localhost
+Master port: 1234
+Number of nodes: 1
+Number of GPUs per node: 2
+Node rank: 0
+Workspace: /project/def-karray/yafathi/MINE/
+Dataset: llff
+Version: debug
+Extra config: {"training.gpus": "0,1"}
+default params: ./configs/params_llff.yaml
+Dumping extra config file...
+[2021-10-16 16:04:53,994 train.py] Training config: {'data.img_h': 384, 'data.img_w': 512, 'data.name': 'llff', 'data.img_pre_downsample_ratio': 7.875, 'data.num_seq_per_gpu': 4, 'data.per_gpu_batch_size': 2, 'data.num_tgt_views': 1, 'data.training_set_path': 'nerf_llff_data', 'data.val_set_path': 'YOUR_VAL_SET', 'data.visible_point_count': 256, 'data.num_workers': 4, 'data.rotation_pi_ratio': 3, 'data.is_exclude_views': True, 'lr.backbone_lr': 0.001, 'lr.decay_gamma': 0.1, 'lr.decay_steps': [60, 90, 120], 'lr.decoder_lr': 0.001, 'lr.weight_decay': 4e-05, 'model.backbone_normalization': True, 'model.decoder_normalization': True, 'model.pos_encoding_multires': 10, 'model.imagenet_pretrained': True, 'mpi.disparity_end': 0.001, 'mpi.disparity_start': 1.0, 'mpi.is_bg_depth_inf': False, 'mpi.num_bins_coarse': 32, 'mpi.num_bins_fine': 0, 'mpi.valid_mask_threshold': 2, 'mpi.fix_disparity': False, 'mpi.use_alpha': False, 'loss.smoothness_lambda_v1': 0.0, 'loss.smoothness_gmin': 0.8, 'loss.smoothness_grad_ratio': 0.2, 'loss.smoothness_lambda_v2': 0.0, 'training.epochs': 200, 'training.eval_interval': 2000, 'training.fine_tune': False, 'training.gpus': [0, 1], 'training.pretrained_checkpoint_path': None, 'training.sample_interval': 30, 'training.src_rgb_blending': True, 'training.use_multi_scale': True, 'testing.frames_apart': 'random', 'current_epoch': 0, 'global_rank': 0, 'local_workspace': '/project/def-karray/yafathi/MINE/debug', 'local_rank': 0, 'world_size': 2, 'log_file': '/project/def-karray/yafathi/MINE/debug/training.log'}
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+[2021-10-16 16:05:13,090 nerf_dataset.py] Dataset root: nerf_llff_data, is_validation: False, number of images: 270
+[2021-10-16 16:05:18,579 nerf_dataset.py] Dataset root: nerf_llff_data, is_validation: True, number of images: 35
+num_ch_enc= num_ch_enc= [  64  256  512 1024 2048][  64  256  512 1024 2048]
+
+upconv_4_0upconv_4_0  20692069  256256
+
+upconv_4_1upconv_4_1  13011301  256256
+
+upconv_3_0upconv_3_0  256256  128128
+
+upconv_3_1upconv_3_1  661661  128128
+
+upconv_2_0upconv_2_0  128128  6464
+
+upconv_2_1upconv_2_1  341341  6464
+
+upconv_1_0upconv_1_0  6464  3232
+
+upconv_1_1upconv_1_1  117117  3232
+
+upconv_0_0upconv_0_0  3232  1616
+
+upconv_0_1upconv_0_1  1616  1616
+
+Setting up [LPIPS] perceptual loss: trunk [vgg], v[0.1], spatial [off]
+Loading model from: /project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/lpips/weights/v0.1/vgg.pth
+[2021-10-16 16:05:22,615 utils.py] Not using pre-trained model...
+Traceback (most recent call last):
+  File "train.py", line 159, in <module>
+Traceback (most recent call last):
+  File "train.py", line 159, in <module>
+    main()
+  File "train.py", line 155, in main
+    train()
+  File "train.py", line 141, in train
+    synthesis_task.train(train_data_loader, val_data_loader)
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 664, in train
+    main()
+  File "train.py", line 155, in main
+    train()
+  File "train.py", line 141, in train
+    synthesis_task.train(train_data_loader, val_data_loader)
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 664, in train
+    self.train_epoch(train_data_loader, val_data_loader, epoch)
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 610, in train_epoch
+    self.train_epoch(train_data_loader, val_data_loader, epoch)
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 610, in train_epoch
+    loss_dict, visualization_dict = self.loss_fcn(is_val=False)
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 379, in loss_fcn
+    loss_dict, visualization_dict = self.loss_fcn(is_val=False)
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 379, in loss_fcn
+    endpoints = self.network_forward()
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 421, in network_forward
+    endpoints = self.network_forward()
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 421, in network_forward
+    mpi_all_src_list, disparity_all_src = mpi_rendering.predict_mpi_coarse_to_fine(
+  File "/project/6006191/yafathi/MINE/operations/mpi_rendering.py", line 270, in predict_mpi_coarse_to_fine
+    mpi_all_src_list, disparity_all_src = mpi_rendering.predict_mpi_coarse_to_fine(
+  File "/project/6006191/yafathi/MINE/operations/mpi_rendering.py", line 270, in predict_mpi_coarse_to_fine
+    mpi_coarse_src_list = mpi_predictor(src_imgs, disparity_coarse_src)  # BxS_coarsex4xHxW
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 225, in mpi_predictor
+    mpi_coarse_src_list = mpi_predictor(src_imgs, disparity_coarse_src)  # BxS_coarsex4xHxW
+  File "/project/6006191/yafathi/MINE/synthesis_task.py", line 225, in mpi_predictor
+    outputs = self.decoder([conv1_out, block1_out, block2_out, block3_out, block4_out],
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    outputs = self.decoder([conv1_out, block1_out, block2_out, block3_out, block4_out],
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 705, in forward
+    result = self.forward(*input, **kwargs)
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/nn/parallel/distributed.py", line 705, in forward
+    output = self.module(*inputs[0], **kwargs[0])
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    output = self.module(*inputs[0], **kwargs[0])
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/project/6006191/yafathi/MINE/network/monodepth2/depth_decoder.py", line 132, in forward
+    result = self.forward(*input, **kwargs)
+  File "/project/6006191/yafathi/MINE/network/monodepth2/depth_decoder.py", line 132, in forward
+    x = torch.cat(x, 1)
+RuntimeError: CUDA out of memory. Tried to allocate 1.37 GiB (GPU 0; 11.91 GiB total capacity; 9.50 GiB already allocated; 1.16 GiB free; 9.82 GiB reserved in total by PyTorch)
+    x = torch.cat(x, 1)
+RuntimeError: CUDA out of memory. Tried to allocate 1.37 GiB (GPU 0; 11.91 GiB total capacity; 9.55 GiB already allocated; 1.10 GiB free; 9.88 GiB reserved in total by PyTorch)
+Traceback (most recent call last):
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.8.10/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.8.10/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/distributed/launch.py", line 340, in <module>
+    main()
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/distributed/launch.py", line 326, in main
+    sigkill_handler(signal.SIGTERM, None)  # not coming back
+  File "/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torch/distributed/launch.py", line 301, in sigkill_handler
+    raise subprocess.CalledProcessError(returncode=last_return_code, cmd=cmd)
+subprocess.CalledProcessError: Command '['/project/6006191/yafathi/MINE_ENV/bin/python3', '-u', 'train.py', '--local_rank=1', '--config_path', './configs/params_llff.yaml', '--workspace', '/project/def-karray/yafathi/MINE/', '--version', 'debug', '--extra_config', '{"training.gpus": "0,1"}']' returned non-zero exit status 1.
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+Killing subprocess 22171
+Killing subprocess 22172

@@ -1,0 +1,627 @@
+Sat Oct 16 16:13:00 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.57.02    Driver Version: 470.57.02    CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla V100-SXM2...  On   | 00000000:18:00.0 Off |                    0 |
+| N/A   36C    P0    40W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  Tesla V100-SXM2...  On   | 00000000:3B:00.0 Off |                    0 |
+| N/A   31C    P0    42W / 300W |      0MiB / 32510MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+Master address: localhost
+Master port: 1234
+Number of nodes: 1
+Number of GPUs per node: 2
+Node rank: 0
+Workspace: /project/def-karray/yafathi/MINE/
+Dataset: llff
+Version: debug
+Extra config: {"training.gpus": "0,1"}
+default params: ./configs/params_llff.yaml
+Dumping extra config file...
+[2021-10-16 16:13:40,609 train.py] Training config: {'data.img_h': 384, 'data.img_w': 512, 'data.name': 'llff', 'data.img_pre_downsample_ratio': 7.875, 'data.num_seq_per_gpu': 4, 'data.per_gpu_batch_size': 2, 'data.num_tgt_views': 1, 'data.training_set_path': 'nerf_llff_data', 'data.val_set_path': 'YOUR_VAL_SET', 'data.visible_point_count': 256, 'data.num_workers': 4, 'data.rotation_pi_ratio': 3, 'data.is_exclude_views': True, 'lr.backbone_lr': 0.001, 'lr.decay_gamma': 0.1, 'lr.decay_steps': [60, 90, 120], 'lr.decoder_lr': 0.001, 'lr.weight_decay': 4e-05, 'model.backbone_normalization': True, 'model.decoder_normalization': True, 'model.pos_encoding_multires': 10, 'model.imagenet_pretrained': True, 'mpi.disparity_end': 0.001, 'mpi.disparity_start': 1.0, 'mpi.is_bg_depth_inf': False, 'mpi.num_bins_coarse': 32, 'mpi.num_bins_fine': 0, 'mpi.valid_mask_threshold': 2, 'mpi.fix_disparity': False, 'mpi.use_alpha': False, 'loss.smoothness_lambda_v1': 0.0, 'loss.smoothness_gmin': 0.8, 'loss.smoothness_grad_ratio': 0.2, 'loss.smoothness_lambda_v2': 0.0, 'training.epochs': 200, 'training.eval_interval': 2000, 'training.fine_tune': False, 'training.gpus': [0, 1], 'training.pretrained_checkpoint_path': None, 'training.sample_interval': 30, 'training.src_rgb_blending': True, 'training.use_multi_scale': True, 'testing.frames_apart': 'random', 'current_epoch': 0, 'global_rank': 0, 'local_workspace': '/project/def-karray/yafathi/MINE/debug', 'local_rank': 0, 'world_size': 2, 'log_file': '/project/def-karray/yafathi/MINE/debug/training.log'}
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+/project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/torchvision/transforms/transforms.py:257: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+[2021-10-16 16:14:08,005 nerf_dataset.py] Dataset root: nerf_llff_data, is_validation: False, number of images: 270
+[2021-10-16 16:14:16,017 nerf_dataset.py] Dataset root: nerf_llff_data, is_validation: True, number of images: 35
+num_ch_enc= num_ch_enc= [  64  256  512 1024 2048]
+[  64  256  512 1024 2048]
+upconv_4_0 2069 256
+upconv_4_0 2069 256
+upconv_4_1 1301 256
+upconv_3_0 256 128
+upconv_4_1 1301 256
+upconv_3_0 256 128
+upconv_3_1 661 128
+upconv_2_0 128 64
+upconv_2_1 341 64
+upconv_1_0 64 32
+upconv_1_1 117 32
+upconv_3_1 661 128
+upconv_0_0 32 16
+upconv_0_1 16 16
+upconv_2_0 128 64
+upconv_2_1 341 64
+upconv_1_0 64 32
+upconv_1_1 117 32
+upconv_0_0 32 16
+upconv_0_1 16 16
+Setting up [LPIPS] perceptual loss: trunk [vgg], v[0.1], spatial [off]
+Loading model from: /project/6006191/yafathi/MINE_ENV/lib/python3.8/site-packages/lpips/weights/v0.1/vgg.pth
+[2021-10-16 16:14:20,710 utils.py] Not using pre-trained model...
+[W reducer.cpp:1050] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters. This flag results in an extra traversal of the autograd graph every iteration, which can adversely affect performance. If your model indeed never has any unused parameters, consider turning this flag off. Note that this warning may be a false positive your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1050] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters. This flag results in an extra traversal of the autograd graph every iteration, which can adversely affect performance. If your model indeed never has any unused parameters, consider turning this flag off. Note that this warning may be a false positive your model has flow control causing later iterations to have unused parameters. (function operator())
+[2021-10-16 16:14:37,528 synthesis_task.py] epoch [001] step [10/67] global_step = 10 total_loss = 6.1502 encoder_lr = 0.0010000
+        src: rgb = 0.1146
+        src: ssim = 0.1703
+        src: smooth = 0.1373
+        src: disp_pt3d = 0.2708
+        tgt: rgb = 0.1837
+        tgt: ssim = 0.7375
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2799
+[2021-10-16 16:14:46,327 synthesis_task.py] epoch [001] step [20/67] global_step = 20 total_loss = 7.4824 encoder_lr = 0.0010000
+        src: rgb = 0.0838
+        src: ssim = 0.1504
+        src: smooth = 0.1311
+        src: disp_pt3d = 0.4579
+        tgt: rgb = 0.1493
+        tgt: ssim = 0.7813
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.4679
+[2021-10-16 16:14:55,134 synthesis_task.py] epoch [001] step [30/67] global_step = 30 total_loss = 5.2332 encoder_lr = 0.0010000
+        src: rgb = 0.0525
+        src: ssim = 0.1094
+        src: smooth = 0.1503
+        src: disp_pt3d = 0.2096
+        tgt: rgb = 0.1501
+        tgt: ssim = 0.6700
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2208
+[2021-10-16 16:15:03,855 synthesis_task.py] epoch [001] step [40/67] global_step = 40 total_loss = 6.6936 encoder_lr = 0.0010000
+        src: rgb = 0.0664
+        src: ssim = 0.1293
+        src: smooth = 0.1335
+        src: disp_pt3d = 0.4291
+        tgt: rgb = 0.1338
+        tgt: ssim = 0.7006
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.3955
+[2021-10-16 16:15:12,930 synthesis_task.py] epoch [001] step [50/67] global_step = 50 total_loss = 4.7954 encoder_lr = 0.0010000
+        src: rgb = 0.0403
+        src: ssim = 0.1077
+        src: smooth = 0.1522
+        src: disp_pt3d = 0.1559
+        tgt: rgb = 0.1319
+        tgt: ssim = 0.6737
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2260
+[2021-10-16 16:15:21,710 synthesis_task.py] epoch [001] step [60/67] global_step = 60 total_loss = 4.0427 encoder_lr = 0.0010000
+        src: rgb = 0.0387
+        src: ssim = 0.0810
+        src: smooth = 0.1656
+        src: disp_pt3d = 0.2114
+        tgt: rgb = 0.0976
+        tgt: ssim = 0.5145
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2007
+[2021-10-16 16:15:27,947 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:15:27,949 synthesis_task.py]     train_loss 4.042658 (5.732906)
+[2021-10-16 16:15:27,949 synthesis_task.py]     train_loss_rgb_src 0.038685 (0.066051)
+[2021-10-16 16:15:27,949 synthesis_task.py]     train_loss_ssim_src 0.081009 (0.124689)
+[2021-10-16 16:15:27,950 synthesis_task.py]     train_loss_disp_pt3dsrc 0.211416 (0.289120)
+[2021-10-16 16:15:27,950 synthesis_task.py]     train_loss_rgb_tgt 0.097624 (0.141071)
+[2021-10-16 16:15:27,950 synthesis_task.py]     train_loss_ssim_tgt 0.514526 (0.679599)
+[2021-10-16 16:15:27,950 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:15:27,950 synthesis_task.py]     train_psnr_tgt 16.789886 (14.233019)
+[2021-10-16 16:15:27,950 synthesis_task.py]     train_loss_disp_pt3dtgt 0.200688 (0.298470)
+[2021-10-16 16:15:36,862 synthesis_task.py] epoch [002] step [10/67] global_step = 77 total_loss = 3.5697 encoder_lr = 0.0010000
+        src: rgb = 0.0411
+        src: ssim = 0.0885
+        src: smooth = 0.1509
+        src: disp_pt3d = 0.1385
+        tgt: rgb = 0.0951
+        tgt: ssim = 0.5286
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1453
+[2021-10-16 16:15:45,545 synthesis_task.py] epoch [002] step [20/67] global_step = 87 total_loss = 4.1730 encoder_lr = 0.0010000
+        src: rgb = 0.0442
+        src: ssim = 0.0777
+        src: smooth = 0.1796
+        src: disp_pt3d = 0.1663
+        tgt: rgb = 0.1212
+        tgt: ssim = 0.5051
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1851
+[2021-10-16 16:15:54,423 synthesis_task.py] epoch [002] step [30/67] global_step = 97 total_loss = 5.4557 encoder_lr = 0.0010000
+        src: rgb = 0.0501
+        src: ssim = 0.1047
+        src: smooth = 0.1513
+        src: disp_pt3d = 0.2846
+        tgt: rgb = 0.1220
+        tgt: ssim = 0.6887
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2811
+[2021-10-16 16:16:03,265 synthesis_task.py] epoch [002] step [40/67] global_step = 107 total_loss = 5.0156 encoder_lr = 0.0010000
+        src: rgb = 0.0459
+        src: ssim = 0.0937
+        src: smooth = 0.1561
+        src: disp_pt3d = 0.1456
+        tgt: rgb = 0.1664
+        tgt: ssim = 0.7403
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1941
+[2021-10-16 16:16:12,141 synthesis_task.py] epoch [002] step [50/67] global_step = 117 total_loss = 4.8168 encoder_lr = 0.0010000
+        src: rgb = 0.0476
+        src: ssim = 0.0973
+        src: smooth = 0.1748
+        src: disp_pt3d = 0.1367
+        tgt: rgb = 0.1531
+        tgt: ssim = 0.7373
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2023
+[2021-10-16 16:16:20,833 synthesis_task.py] epoch [002] step [60/67] global_step = 127 total_loss = 4.2908 encoder_lr = 0.0010000
+        src: rgb = 0.0580
+        src: ssim = 0.0950
+        src: smooth = 0.1728
+        src: disp_pt3d = 0.1612
+        tgt: rgb = 0.1215
+        tgt: ssim = 0.6352
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1674
+[2021-10-16 16:16:26,940 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:16:26,941 synthesis_task.py]     train_loss 4.290819 (4.553620)
+[2021-10-16 16:16:26,941 synthesis_task.py]     train_loss_rgb_src 0.058017 (0.047822)
+[2021-10-16 16:16:26,941 synthesis_task.py]     train_loss_ssim_src 0.094995 (0.092805)
+[2021-10-16 16:16:26,941 synthesis_task.py]     train_loss_disp_pt3dsrc 0.161238 (0.172155)
+[2021-10-16 16:16:26,941 synthesis_task.py]     train_loss_rgb_tgt 0.121470 (0.129877)
+[2021-10-16 16:16:26,941 synthesis_task.py]     train_loss_ssim_tgt 0.635243 (0.639219)
+[2021-10-16 16:16:26,942 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:16:26,942 synthesis_task.py]     train_psnr_tgt 15.883787 (15.259761)
+[2021-10-16 16:16:26,942 synthesis_task.py]     train_loss_disp_pt3dtgt 0.167374 (0.195877)
+[2021-10-16 16:16:35,705 synthesis_task.py] epoch [003] step [10/67] global_step = 144 total_loss = 4.2364 encoder_lr = 0.0010000
+        src: rgb = 0.0424
+        src: ssim = 0.0839
+        src: smooth = 0.2103
+        src: disp_pt3d = 0.1655
+        tgt: rgb = 0.1207
+        tgt: ssim = 0.6187
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1932
+[2021-10-16 16:16:44,407 synthesis_task.py] epoch [003] step [20/67] global_step = 154 total_loss = 4.4525 encoder_lr = 0.0010000
+        src: rgb = 0.0424
+        src: ssim = 0.0900
+        src: smooth = 0.1877
+        src: disp_pt3d = 0.0984
+        tgt: rgb = 0.1200
+        tgt: ssim = 0.6720
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1817
+[2021-10-16 16:16:53,417 synthesis_task.py] epoch [003] step [30/67] global_step = 164 total_loss = 3.2140 encoder_lr = 0.0010000
+        src: rgb = 0.0271
+        src: ssim = 0.0430
+        src: smooth = 0.2183
+        src: disp_pt3d = 0.1188
+        tgt: rgb = 0.0975
+        tgt: ssim = 0.3805
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1354
+[2021-10-16 16:17:02,319 synthesis_task.py] epoch [003] step [40/67] global_step = 174 total_loss = 4.8768 encoder_lr = 0.0010000
+        src: rgb = 0.0418
+        src: ssim = 0.0814
+        src: smooth = 0.1733
+        src: disp_pt3d = 0.1846
+        tgt: rgb = 0.1331
+        tgt: ssim = 0.7174
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2371
+[2021-10-16 16:17:11,299 synthesis_task.py] epoch [003] step [50/67] global_step = 184 total_loss = 5.0988 encoder_lr = 0.0010000
+        src: rgb = 0.0557
+        src: ssim = 0.0816
+        src: smooth = 0.1853
+        src: disp_pt3d = 0.1654
+        tgt: rgb = 0.1534
+        tgt: ssim = 0.7400
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1980
+[2021-10-16 16:17:20,015 synthesis_task.py] epoch [003] step [60/67] global_step = 194 total_loss = 3.5883 encoder_lr = 0.0010000
+        src: rgb = 0.0336
+        src: ssim = 0.0470
+        src: smooth = 0.1766
+        src: disp_pt3d = 0.1280
+        tgt: rgb = 0.1148
+        tgt: ssim = 0.4300
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1345
+[2021-10-16 16:17:26,130 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:17:26,132 synthesis_task.py]     train_loss 3.588321 (4.244480)
+[2021-10-16 16:17:26,132 synthesis_task.py]     train_loss_rgb_src 0.033565 (0.040469)
+[2021-10-16 16:17:26,132 synthesis_task.py]     train_loss_ssim_src 0.047018 (0.071145)
+[2021-10-16 16:17:26,132 synthesis_task.py]     train_loss_disp_pt3dsrc 0.127993 (0.143468)
+[2021-10-16 16:17:26,133 synthesis_task.py]     train_loss_rgb_tgt 0.114839 (0.123268)
+[2021-10-16 16:17:26,133 synthesis_task.py]     train_loss_ssim_tgt 0.429988 (0.593098)
+[2021-10-16 16:17:26,133 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:17:26,133 synthesis_task.py]     train_psnr_tgt 15.642589 (14.878299)
+[2021-10-16 16:17:26,133 synthesis_task.py]     train_loss_disp_pt3dtgt 0.134531 (0.179989)
+[2021-10-16 16:17:34,986 synthesis_task.py] epoch [004] step [10/67] global_step = 211 total_loss = 4.4847 encoder_lr = 0.0010000
+        src: rgb = 0.0424
+        src: ssim = 0.0779
+        src: smooth = 0.1697
+        src: disp_pt3d = 0.1472
+        tgt: rgb = 0.1354
+        tgt: ssim = 0.6954
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1890
+[2021-10-16 16:17:43,870 synthesis_task.py] epoch [004] step [20/67] global_step = 221 total_loss = 4.1881 encoder_lr = 0.0010000
+        src: rgb = 0.0408
+        src: ssim = 0.0728
+        src: smooth = 0.1781
+        src: disp_pt3d = 0.1687
+        tgt: rgb = 0.1276
+        tgt: ssim = 0.6226
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1667
+[2021-10-16 16:17:52,711 synthesis_task.py] epoch [004] step [30/67] global_step = 231 total_loss = 4.2044 encoder_lr = 0.0010000
+        src: rgb = 0.0399
+        src: ssim = 0.0782
+        src: smooth = 0.1944
+        src: disp_pt3d = 0.1727
+        tgt: rgb = 0.1134
+        tgt: ssim = 0.6243
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1702
+[2021-10-16 16:18:01,477 synthesis_task.py] epoch [004] step [40/67] global_step = 241 total_loss = 4.8625 encoder_lr = 0.0010000
+        src: rgb = 0.0445
+        src: ssim = 0.0772
+        src: smooth = 0.1878
+        src: disp_pt3d = 0.1408
+        tgt: rgb = 0.1494
+        tgt: ssim = 0.7469
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1891
+[2021-10-16 16:18:10,373 synthesis_task.py] epoch [004] step [50/67] global_step = 251 total_loss = 3.9480 encoder_lr = 0.0010000
+        src: rgb = 0.0510
+        src: ssim = 0.0788
+        src: smooth = 0.2097
+        src: disp_pt3d = 0.1377
+        tgt: rgb = 0.1283
+        tgt: ssim = 0.6221
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1415
+[2021-10-16 16:18:19,212 synthesis_task.py] epoch [004] step [60/67] global_step = 261 total_loss = 3.6584 encoder_lr = 0.0010000
+        src: rgb = 0.0379
+        src: ssim = 0.0775
+        src: smooth = 0.2003
+        src: disp_pt3d = 0.1198
+        tgt: rgb = 0.1042
+        tgt: ssim = 0.6235
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1289
+[2021-10-16 16:18:25,657 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:18:25,658 synthesis_task.py]     train_loss 3.658415 (4.224339)
+[2021-10-16 16:18:25,658 synthesis_task.py]     train_loss_rgb_src 0.037888 (0.042733)
+[2021-10-16 16:18:25,658 synthesis_task.py]     train_loss_ssim_src 0.077505 (0.077069)
+[2021-10-16 16:18:25,658 synthesis_task.py]     train_loss_disp_pt3dsrc 0.119801 (0.147822)
+[2021-10-16 16:18:25,658 synthesis_task.py]     train_loss_rgb_tgt 0.104228 (0.126393)
+[2021-10-16 16:18:25,659 synthesis_task.py]     train_loss_ssim_tgt 0.623524 (0.655811)
+[2021-10-16 16:18:25,659 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:18:25,659 synthesis_task.py]     train_psnr_tgt 16.530525 (15.145105)
+[2021-10-16 16:18:25,659 synthesis_task.py]     train_loss_disp_pt3dtgt 0.128947 (0.164259)
+[2021-10-16 16:18:34,516 synthesis_task.py] epoch [005] step [10/67] global_step = 278 total_loss = 4.5702 encoder_lr = 0.0010000
+        src: rgb = 0.0493
+        src: ssim = 0.0878
+        src: smooth = 0.1776
+        src: disp_pt3d = 0.0940
+        tgt: rgb = 0.1482
+        tgt: ssim = 0.7435
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1617
+[2021-10-16 16:18:43,354 synthesis_task.py] epoch [005] step [20/67] global_step = 288 total_loss = 4.1521 encoder_lr = 0.0010000
+        src: rgb = 0.0346
+        src: ssim = 0.0598
+        src: smooth = 0.1979
+        src: disp_pt3d = 0.1099
+        tgt: rgb = 0.1322
+        tgt: ssim = 0.6172
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1257
+[2021-10-16 16:18:52,275 synthesis_task.py] epoch [005] step [30/67] global_step = 298 total_loss = 3.8541 encoder_lr = 0.0010000
+        src: rgb = 0.0316
+        src: ssim = 0.0686
+        src: smooth = 0.1776
+        src: disp_pt3d = 0.0835
+        tgt: rgb = 0.1218
+        tgt: ssim = 0.6425
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0864
+[2021-10-16 16:19:01,178 synthesis_task.py] epoch [005] step [40/67] global_step = 308 total_loss = 5.0204 encoder_lr = 0.0010000
+        src: rgb = 0.0401
+        src: ssim = 0.0699
+        src: smooth = 0.1970
+        src: disp_pt3d = 0.1996
+        tgt: rgb = 0.1168
+        tgt: ssim = 0.6211
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2895
+[2021-10-16 16:19:10,104 synthesis_task.py] epoch [005] step [50/67] global_step = 318 total_loss = 5.6303 encoder_lr = 0.0010000
+        src: rgb = 0.0569
+        src: ssim = 0.1020
+        src: smooth = 0.1729
+        src: disp_pt3d = 0.1941
+        tgt: rgb = 0.1676
+        tgt: ssim = 0.8126
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.2550
+[2021-10-16 16:19:18,929 synthesis_task.py] epoch [005] step [60/67] global_step = 328 total_loss = 3.7079 encoder_lr = 0.0010000
+        src: rgb = 0.0367
+        src: ssim = 0.0723
+        src: smooth = 0.1926
+        src: disp_pt3d = 0.0798
+        tgt: rgb = 0.1138
+        tgt: ssim = 0.6345
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1201
+[2021-10-16 16:19:25,110 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:19:25,112 synthesis_task.py]     train_loss 3.707906 (4.489159)
+[2021-10-16 16:19:25,112 synthesis_task.py]     train_loss_rgb_src 0.036724 (0.041524)
+[2021-10-16 16:19:25,112 synthesis_task.py]     train_loss_ssim_src 0.072344 (0.076742)
+[2021-10-16 16:19:25,112 synthesis_task.py]     train_loss_disp_pt3dsrc 0.079816 (0.126824)
+[2021-10-16 16:19:25,112 synthesis_task.py]     train_loss_rgb_tgt 0.113766 (0.133401)
+[2021-10-16 16:19:25,113 synthesis_task.py]     train_loss_ssim_tgt 0.634522 (0.678565)
+[2021-10-16 16:19:25,113 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:19:25,113 synthesis_task.py]     train_psnr_tgt 16.238987 (14.326822)
+[2021-10-16 16:19:25,113 synthesis_task.py]     train_loss_disp_pt3dtgt 0.120108 (0.173074)
+[2021-10-16 16:19:33,986 synthesis_task.py] epoch [006] step [10/67] global_step = 345 total_loss = 3.4059 encoder_lr = 0.0010000
+        src: rgb = 0.0504
+        src: ssim = 0.0659
+        src: smooth = 0.1976
+        src: disp_pt3d = 0.0899
+        tgt: rgb = 0.1088
+        tgt: ssim = 0.5818
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0957
+[2021-10-16 16:19:42,811 synthesis_task.py] epoch [006] step [20/67] global_step = 355 total_loss = 4.6812 encoder_lr = 0.0010000
+        src: rgb = 0.0390
+        src: ssim = 0.0788
+        src: smooth = 0.1985
+        src: disp_pt3d = 0.1116
+        tgt: rgb = 0.1601
+        tgt: ssim = 0.7441
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1634
+[2021-10-16 16:19:51,622 synthesis_task.py] epoch [006] step [30/67] global_step = 365 total_loss = 3.4971 encoder_lr = 0.0010000
+        src: rgb = 0.0311
+        src: ssim = 0.0709
+        src: smooth = 0.1906
+        src: disp_pt3d = 0.0721
+        tgt: rgb = 0.1185
+        tgt: ssim = 0.5777
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1025
+[2021-10-16 16:20:00,294 synthesis_task.py] epoch [006] step [40/67] global_step = 375 total_loss = 2.8833 encoder_lr = 0.0010000
+        src: rgb = 0.0301
+        src: ssim = 0.0642
+        src: smooth = 0.1795
+        src: disp_pt3d = 0.0762
+        tgt: rgb = 0.0673
+        tgt: ssim = 0.5489
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0854
+[2021-10-16 16:20:09,022 synthesis_task.py] epoch [006] step [50/67] global_step = 385 total_loss = 3.7293 encoder_lr = 0.0010000
+        src: rgb = 0.0406
+        src: ssim = 0.0690
+        src: smooth = 0.1898
+        src: disp_pt3d = 0.0966
+        tgt: rgb = 0.1048
+        tgt: ssim = 0.6274
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1155
+[2021-10-16 16:20:17,638 synthesis_task.py] epoch [006] step [60/67] global_step = 395 total_loss = 3.9670 encoder_lr = 0.0010000
+        src: rgb = 0.0342
+        src: ssim = 0.0785
+        src: smooth = 0.2065
+        src: disp_pt3d = 0.1175
+        tgt: rgb = 0.1076
+        tgt: ssim = 0.6290
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1682
+[2021-10-16 16:20:23,850 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:20:23,851 synthesis_task.py]     train_loss 3.966985 (3.693979)
+[2021-10-16 16:20:23,851 synthesis_task.py]     train_loss_rgb_src 0.034234 (0.037600)
+[2021-10-16 16:20:23,851 synthesis_task.py]     train_loss_ssim_src 0.078469 (0.071218)
+[2021-10-16 16:20:23,852 synthesis_task.py]     train_loss_disp_pt3dsrc 0.117492 (0.093988)
+[2021-10-16 16:20:23,852 synthesis_task.py]     train_loss_rgb_tgt 0.107646 (0.111194)
+[2021-10-16 16:20:23,852 synthesis_task.py]     train_loss_ssim_tgt 0.629042 (0.618157)
+[2021-10-16 16:20:23,852 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:20:23,852 synthesis_task.py]     train_psnr_tgt 16.228670 (16.242112)
+[2021-10-16 16:20:23,852 synthesis_task.py]     train_loss_disp_pt3dtgt 0.168205 (0.121780)
+[2021-10-16 16:20:32,418 synthesis_task.py] epoch [007] step [10/67] global_step = 412 total_loss = 2.9142 encoder_lr = 0.0010000
+        src: rgb = 0.0356
+        src: ssim = 0.0662
+        src: smooth = 0.2260
+        src: disp_pt3d = 0.0768
+        tgt: rgb = 0.0814
+        tgt: ssim = 0.5367
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0761
+[2021-10-16 16:20:41,188 synthesis_task.py] epoch [007] step [20/67] global_step = 422 total_loss = 3.5895 encoder_lr = 0.0010000
+        src: rgb = 0.0318
+        src: ssim = 0.0599
+        src: smooth = 0.2452
+        src: disp_pt3d = 0.0853
+        tgt: rgb = 0.1249
+        tgt: ssim = 0.6080
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1004
+[2021-10-16 16:20:49,855 synthesis_task.py] epoch [007] step [30/67] global_step = 432 total_loss = 3.7279 encoder_lr = 0.0010000
+        src: rgb = 0.0329
+        src: ssim = 0.0613
+        src: smooth = 0.2051
+        src: disp_pt3d = 0.0961
+        tgt: rgb = 0.1019
+        tgt: ssim = 0.6215
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1254
+[2021-10-16 16:20:58,649 synthesis_task.py] epoch [007] step [40/67] global_step = 442 total_loss = 3.3728 encoder_lr = 0.0010000
+        src: rgb = 0.0319
+        src: ssim = 0.0642
+        src: smooth = 0.1987
+        src: disp_pt3d = 0.0921
+        tgt: rgb = 0.0940
+        tgt: ssim = 0.5866
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0860
+[2021-10-16 16:21:07,481 synthesis_task.py] epoch [007] step [50/67] global_step = 452 total_loss = 3.0811 encoder_lr = 0.0010000
+        src: rgb = 0.0374
+        src: ssim = 0.0665
+        src: smooth = 0.2317
+        src: disp_pt3d = 0.0917
+        tgt: rgb = 0.0996
+        tgt: ssim = 0.5379
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0872
+[2021-10-16 16:21:16,378 synthesis_task.py] epoch [007] step [60/67] global_step = 462 total_loss = 3.0044 encoder_lr = 0.0010000
+        src: rgb = 0.0237
+        src: ssim = 0.0372
+        src: smooth = 0.2437
+        src: disp_pt3d = 0.0969
+        tgt: rgb = 0.0944
+        tgt: ssim = 0.3857
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1134
+[2021-10-16 16:21:22,601 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:21:22,602 synthesis_task.py]     train_loss 3.004419 (3.281656)
+[2021-10-16 16:21:22,602 synthesis_task.py]     train_loss_rgb_src 0.023692 (0.032237)
+[2021-10-16 16:21:22,602 synthesis_task.py]     train_loss_ssim_src 0.037232 (0.059223)
+[2021-10-16 16:21:22,602 synthesis_task.py]     train_loss_disp_pt3dsrc 0.096864 (0.089819)
+[2021-10-16 16:21:22,603 synthesis_task.py]     train_loss_rgb_tgt 0.094392 (0.099376)
+[2021-10-16 16:21:22,603 synthesis_task.py]     train_loss_ssim_tgt 0.385673 (0.546034)
+[2021-10-16 16:21:22,603 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:21:22,603 synthesis_task.py]     train_psnr_tgt 16.753468 (16.667462)
+[2021-10-16 16:21:22,603 synthesis_task.py]     train_loss_disp_pt3dtgt 0.113394 (0.098079)
+[2021-10-16 16:21:31,426 synthesis_task.py] epoch [008] step [10/67] global_step = 479 total_loss = 3.2534 encoder_lr = 0.0010000
+        src: rgb = 0.0275
+        src: ssim = 0.0662
+        src: smooth = 0.1717
+        src: disp_pt3d = 0.0820
+        tgt: rgb = 0.0786
+        tgt: ssim = 0.6061
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0831
+[2021-10-16 16:21:40,257 synthesis_task.py] epoch [008] step [20/67] global_step = 489 total_loss = 3.8950 encoder_lr = 0.0010000
+        src: rgb = 0.0473
+        src: ssim = 0.0675
+        src: smooth = 0.2361
+        src: disp_pt3d = 0.0957
+        tgt: rgb = 0.1426
+        tgt: ssim = 0.6636
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1019
+[2021-10-16 16:21:49,289 synthesis_task.py] epoch [008] step [30/67] global_step = 499 total_loss = 3.5794 encoder_lr = 0.0010000
+        src: rgb = 0.0410
+        src: ssim = 0.0597
+        src: smooth = 0.2189
+        src: disp_pt3d = 0.0853
+        tgt: rgb = 0.1199
+        tgt: ssim = 0.5671
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1112
+[2021-10-16 16:21:58,069 synthesis_task.py] epoch [008] step [40/67] global_step = 509 total_loss = 3.0955 encoder_lr = 0.0010000
+        src: rgb = 0.0232
+        src: ssim = 0.0478
+        src: smooth = 0.2050
+        src: disp_pt3d = 0.0599
+        tgt: rgb = 0.0944
+        tgt: ssim = 0.5031
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0777
+[2021-10-16 16:22:06,815 synthesis_task.py] epoch [008] step [50/67] global_step = 519 total_loss = 2.7554 encoder_lr = 0.0010000
+        src: rgb = 0.0269
+        src: ssim = 0.0491
+        src: smooth = 0.2425
+        src: disp_pt3d = 0.1002
+        tgt: rgb = 0.0731
+        tgt: ssim = 0.4271
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0865
+[2021-10-16 16:22:15,702 synthesis_task.py] epoch [008] step [60/67] global_step = 529 total_loss = 3.5069 encoder_lr = 0.0010000
+        src: rgb = 0.0543
+        src: ssim = 0.0633
+        src: smooth = 0.1591
+        src: disp_pt3d = 0.0936
+        tgt: rgb = 0.0945
+        tgt: ssim = 0.5917
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1213
+[2021-10-16 16:22:21,893 synthesis_task.py] Epoch finished, average losses: 
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_loss 3.506939 (3.347613)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_loss_rgb_src 0.054311 (0.036702)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_loss_ssim_src 0.063285 (0.058941)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_loss_disp_pt3dsrc 0.093629 (0.086118)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_loss_rgb_tgt 0.094548 (0.100531)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_loss_ssim_tgt 0.591729 (0.559803)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_lpips_tgt 0.000000 (0.000000)
+[2021-10-16 16:22:21,894 synthesis_task.py]     train_psnr_tgt 17.960926 (17.000820)
+[2021-10-16 16:22:21,895 synthesis_task.py]     train_loss_disp_pt3dtgt 0.121313 (0.096953)
+[2021-10-16 16:22:30,720 synthesis_task.py] epoch [009] step [10/67] global_step = 546 total_loss = 3.3769 encoder_lr = 0.0010000
+        src: rgb = 0.0341
+        src: ssim = 0.0652
+        src: smooth = 0.2054
+        src: disp_pt3d = 0.0836
+        tgt: rgb = 0.0972
+        tgt: ssim = 0.6214
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0918
+[2021-10-16 16:22:39,436 synthesis_task.py] epoch [009] step [20/67] global_step = 556 total_loss = 2.9215 encoder_lr = 0.0010000
+        src: rgb = 0.0340
+        src: ssim = 0.0422
+        src: smooth = 0.2057
+        src: disp_pt3d = 0.0778
+        tgt: rgb = 0.0925
+        tgt: ssim = 0.4686
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0790
+[2021-10-16 16:22:48,358 synthesis_task.py] epoch [009] step [30/67] global_step = 566 total_loss = 3.0122 encoder_lr = 0.0010000
+        src: rgb = 0.0322
+        src: ssim = 0.0566
+        src: smooth = 0.2161
+        src: disp_pt3d = 0.0818
+        tgt: rgb = 0.0908
+        tgt: ssim = 0.5500
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0912
+[2021-10-16 16:22:57,236 synthesis_task.py] epoch [009] step [40/67] global_step = 576 total_loss = 3.5264 encoder_lr = 0.0010000
+        src: rgb = 0.0332
+        src: ssim = 0.0591
+        src: smooth = 0.2020
+        src: disp_pt3d = 0.0944
+        tgt: rgb = 0.1074
+        tgt: ssim = 0.6146
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.0994
+[2021-10-16 16:23:05,994 synthesis_task.py] epoch [009] step [50/67] global_step = 586 total_loss = 3.4592 encoder_lr = 0.0010000
+        src: rgb = 0.0343
+        src: ssim = 0.0532
+        src: smooth = 0.2147
+        src: disp_pt3d = 0.1041
+        tgt: rgb = 0.1187
+        tgt: ssim = 0.5389
+        tgt: smooth = 0.0000
+        tgt: disp_pt3d = 0.1017
+slurmstepd: error: *** JOB 17083357 ON cdr2606 CANCELLED AT 2021-10-16T16:23:08 DUE TO TIME LIMIT ***
