@@ -97,7 +97,7 @@ class NeRFDataset(data.Dataset):
     def __len__(self):
         return self.length
 
-    def get_data(self, img_src, img_trg, src_shape, trg_shape,
+    def get_data(self, img_src,src_num, img_trg,trg_num, src_shape, trg_shape,
                        calib_data):
         """Single pair loader.
         Args:
@@ -116,12 +116,12 @@ class NeRFDataset(data.Dataset):
         """
         rot = np.eye(3)
         trans = np.zeros(3)
-        k_s = np.copy(calib_data['P_rect_02'].reshape(3, 4)[:3, :3])
+        k_s = np.copy(calib_data[f'P_rect_0{str(src_num)}'].reshape(3, 4)[:3, :3])
 
-        k_t = np.copy(calib_data['P_rect_03'].reshape(3, 4)[:3, :3])
+        k_t = np.copy(calib_data[f'P_rect_0{str(trg_num)}'].reshape(3, 4)[:3, :3])
 
-        trans_src = np.copy(calib_data['P_rect_02'].reshape(3, 4)[:, 3])
-        trans_trg = np.copy(calib_data['P_rect_03'].reshape(3, 4)[:, 3])
+        trans_src = np.copy(calib_data[f'P_rect_0{str(src_num)}'].reshape(3, 4)[:, 3])
+        trans_trg = np.copy(calib_data[f'P_rect_0{str(trg_num)}'].reshape(3, 4)[:, 3])
 
         # The translation is in homogeneous 2D coords, convert to regular 3d space:
         trans_src[0] = (trans_src[0] - k_s[0, 2] * trans_src[2]) / k_s[0, 0]
@@ -131,7 +131,7 @@ class NeRFDataset(data.Dataset):
         trans_trg[1] = (trans_trg[1] - k_t[1, 2] * trans_trg[2]) / k_t[1, 1]
 
         trans = trans_trg - trans_src
-
+        
         k_s = resize_instrinsic(k_s, self.img_w / src_shape[1], self.img_h / src_shape[0])
         k_t = resize_instrinsic(k_t, self.img_w / trg_shape[1], self.img_h / trg_shape[0])
 
@@ -143,22 +143,42 @@ class NeRFDataset(data.Dataset):
         calib_data = self.cam_calibration[self.seq_id_list[index]]
         img_src = Image.open(img_path_src)
         img_tgt = Image.open(img_path_trgt)
+        img_src_size = img_src.size #(w,h)
+        # print("BEFORE RESIZE",img_src_size)
+        img_tgt_size = img_tgt.size
+        # if(self.is_validation):
+        #     left_src = (img_src_size[0] - int(img_src_size[0]*0.9))/2
+        #     top_src = (height - new_height)/2
+        #     right_src = (width + new_width)/2
+        #     bottom_src = (height + new_height)/2
+        #     # Crop the center of the image
+        #     im = im.crop((left, top, right, bottom))
+        #             # print(img_src)
+        # img_src_new = transforms.CenterCrop((int(img_src_size[1]*0.9),int(img_src_size[0]*0.9)))(img_src)
+        # img_src_new.save(f"test_{index}.png")
         img_src = self.img_transforms(img_src)
-        img_src_size = img_src.size()
+        # print("AFTER RESIZE",img_src.size())
         img_tgt = self.img_transforms(img_tgt)
-        img_tgt_size = img_tgt.size()
-        img_src, img_trg, k_s, k_t, rot, trans_trg,trans_src = self.get_data(img_src,img_tgt,(img_src_size[1],img_src_size[0]),(img_tgt_size[1],img_tgt_size[0]),calib_data)
-        G_src = np.vstack([
-            np.hstack((rot, trans_src)),
+        src_num =2
+        tgt_num=3
+        if("image_03" in img_path_src and "image_02" in img_path_trgt):
+            src_num = 3
+            tgt_num =2
+        img_src, img_trg, k_s, k_t, rot, trans_trg,trans_src = self.get_data(img_src,src_num,img_tgt,tgt_num,(img_src_size[1],img_src_size[0]),(img_tgt_size[1],img_tgt_size[0]),calib_data)
+        # G_src = np.vstack([
+        #     np.hstack((rot, trans_src)),
+        #     np.array([0, 0, 0, 1])
+        # ]).astype(np.float32)
+        # G_trg = np.vstack([
+        #     np.hstack((rot, trans_trg)),
+        #     np.array([0, 0, 0, 1])
+        # ]).astype(np.float32)
+        # G_src_trg = G_src.copy()
+        G_src_trg = np.vstack([
+            np.hstack((rot, -trans_trg +trans_src)),
             np.array([0, 0, 0, 1])
         ]).astype(np.float32)
-        G_trg = np.vstack([
-            np.hstack((rot, trans_trg)),
-            np.array([0, 0, 0, 1])
-        ]).astype(np.float32)
-
-        G_src_trg = G_src @ np.linalg.inv(G_trg)
-       
+        # G_src_trg = G_src @ np.linalg.inv(G_trg)
         src_item = {
             "img":img_src,
             "K":k_s,
@@ -185,7 +205,8 @@ class NeRFDataset(data.Dataset):
             ])
         else:
             self.img_transforms = transforms.Compose([
-                transforms.CenterCrop((int(self.img_h*0.95),int(self.img_w*0.95))),
+                transforms.Resize((self.img_h, self.img_w), interpolation=Image.BICUBIC),
+                transforms.CenterCrop((int(self.img_h*0.90),int(self.img_w*0.90))), #Crop 5% from each side
                 transforms.Resize((self.img_h, self.img_w), interpolation=Image.BICUBIC),
                 transforms.ToTensor(),
             ])
@@ -208,8 +229,7 @@ class NeRFDataset(data.Dataset):
         if not self.is_validation:
             seq_names = seq_names[0:n_train]
         else:
-            seq_names = seq_names[n_train:(n_train + n_val)]
-       
+            seq_names = seq_names[(n_train + n_val):n_all]       
         for seq_id in seq_names:
             seq_date = seq_id[0:10]
             seq_dir = os.path.join(self.root_dir, seq_date,
@@ -223,11 +243,12 @@ class NeRFDataset(data.Dataset):
         self.img_list_trg = [
           f.replace('image_02', 'image_03') for f in self.img_list_src
          ]
-        for i in range(len(self.img_list_src)):
-             num= random.randint(0,1)
-             if(num==1):
-                 self.img_list_src[i] = self.img_list_src[i].replace('image_02', 'image_03')
-                 self.img_list_trg[i] = self.img_list_trg[i].replace('image_03', 'image_02')
+        if(not self.is_validation):
+            for i in range(len(self.img_list_src)):
+                num= random.randint(0,1)
+                if(num==1):
+                    self.img_list_src[i] = self.img_list_src[i].replace('image_02', 'image_03')
+                    self.img_list_trg[i] = self.img_list_trg[i].replace('image_03', 'image_02')
     def preload_calib_files(self):
         """Preload calibration files for the sequence."""
        
@@ -263,13 +284,13 @@ class NeRFDataset(data.Dataset):
 if __name__ == "__main__":
     import logging
     dataset = NeRFDataset({}, logging,
-                          root="/home/yafathi/projects/def-karray/yafathi/MINE/kitti_raw_data",
+                          root="/home/yafathi/scratch/kitti_raw_data",
                           is_validation=True,
                           img_size=(384, 256))
                          
     from torch.utils.data import DataLoader
 
-    dl = DataLoader(dataset, batch_size=4, shuffle=False,
+    dl = DataLoader(dataset, batch_size=10, shuffle=True,
                     drop_last=True, num_workers=0)
                     # collate_fn=_collate_fn)
 
