@@ -1,68 +1,34 @@
 # MINE: Continuous-Depth MPI with Neural Radiance Fields
-### [Project Page](https://vincentfung13.github.io/projects/nemi/) | [YouTube](https://youtu.be/I_92BXju350) | [bilibili](https://www.bilibili.com/video/BV1qR4y1H7F1/)
-PyTorch implementation for our ICCV 2021 paper.<br><br>
-[MINE: Towards Continuous Depth MPI with NeRF for Novel View Synthesis](https://vincentfung13.github.io/projects/nemi/)  
- [Jiaxin Li](https://www.jiaxinli.me/)\*<sup>1</sup>,
- [Zijian Feng](https://vincentfung13.github.io/)\*<sup>1</sup>,
- [Qi She](http://scholar.google.com/citations?user=iHoGTt4AAAAJ&hl=en)<sup>1</sup>,
- [Henghui Ding](https://henghuiding.github.io/)<sup>1</sup>,
- [Changhu Wang](http://scholar.google.com.sg/citations?user=DsVZkjAAAAAJ&hl=en)<sup>1</sup>,
- [Gim Hee Lee](https://www.comp.nus.edu.sg/~leegh)<sup>2</sup> <br>
- <sup>1</sup>ByteDance, <sup>2</sup>National University of Singapore  
-  \*denotes equal contribution  
+ 
+***2021 ML Reproducibility Challenge Code Submission***
+This repository contains our reproduibility code for MINE paper. The code portions corresponding to each experiment are mentioned below.
 
-Our MINE takes a single image as input and densely reconstructs the frustum of the camera, through which we can easily render novel views of the given scene:
+## Slurm Bash Scripts
 
-![ferngif](resources/teasers.gif)
+All of our experiments were implemented on a cloud compute cluster using Slurm which requires submitting jobs to run the experiments using specified bash scripts. You will find such scripts starting with "sbatch" in our root folder.
 
-The overall architecture of our method:
+## Reproducibility on KITTI Raw
 
-<img src='resources/pipeline.png'/>
+### Downloading the dataset
+We downloaded the dataset using the script "raw_data_downloader.sh". This script should be placed in the directory where the data will be placed an ran from there.
 
-## Run training on the LLFF dataset:
+### Dataloader
+The original MINE paper didn't include code for the dataloader of KITTI Raw dataset, so we had to create one ourselves following the class structure defined in the given sample dataloader published for LLFF dataset in "input_pipelines/llff/nerf_dataset.py". Our data loader could be found in "input_pipelines/kitti_raw/nerf_dataset.py". To create the loader we followed the steps made by Tulisiani et al. in their code here (add link), which includes the following steps:
 
-Firstly, set up your conda environment:
-```
-conda env create -f environment.yml 
-conda activate MINE
-```
+ - Loading the correct training and test sequences for fair comparison (init_img_names_seq_list() function)
+ - Preprocessing the given camera intrinsics and extrinsics for both the source and target views. ( read_calib_file() and get_data() )
+ - Transformation on the images (__init_img_transforms() )
+ - Getting a sample source and target view ( \_\_getitem\_\_(index) )
 
-Download the pre-downsampled version of the LLFF dataset from [Google Drive](https://drive.google.com/file/d/1sV7ioO_bintNg4U33YfUpFDD782OY8NI/view?usp=sharing), unzip it and put it in the root of the project, then start training by running the following command:
-```
-sh start_training.sh MASTER_ADDR="localhost" MASTER_PORT=1234 N_NODES=1 GPUS_PER_NODE=2 NODE_RANK=0 WORKSPACE=/run/user/3861/vs_tmp DATASET=llff VERSION=debug EXTRA_CONFIG='{"training.gpus": "0,1"}'
-```
+###  Training Pipeline
+The original code included the training pipeline for LLFF dataset only in "train.py" and "synthesis_task.py". Since the pipeline for KITTI Raw is slightly different, we created our modified training code in "synthesis_task_kitti.py" which includes the following changes:
 
-You may find the tensorboard logs and checkpoints in the sub-working directory (WORKSPACE + VERSION). 
+ - Remove the sparse disparity loss from the final loss computation in (loss_fcn_per_scale)
+ - Remove any usage of 3D point clouds in the code since they're not loaded from the beginning in the dataloader unlike LLFF.
 
-Apart from the LLFF dataset, we experimented on the RealEstate10K, KITTI Raw and the Flowers Light Fields datasets - the data pre-processing codes and training flow for these datasets will be released later.
+We also adjusted "train.py" to use our new "synthesis_task_kitti.py" and to include kitti raw dataset calls in "get_dataset()"
 
-## Running our pretrained models:
+The final training is run using batch script "sbatch_start_training.sh" which runs the training on 4 V100 GPUs for the intended time"
 
-We release the pretrained models trained on the RealEstate10K, KITTI and the Flowers datasets:
+The output of the training is printed in "/sbatch_output" directory and we use the final validation step after the final epoch done and report the results as the original code does.
 
-|    Dataset    |  N | Input Resolution | Download Link |
-|:-------------:|:--:|:----------------:|:-------------:|
-| RealEstate10K | 32 |      384x256     |  [Google Drive](https://drive.google.com/drive/folders/1otJH4O_p6v96r-PHw_8c7dS-ketKHi2o?usp=sharing) |
-| RealEstate10K | 64 |      384x256     |  [Google Drive](https://drive.google.com/drive/folders/1bD-DRjoX7UcKTI2WjoDaU3lCXZBzoI7n?usp=sharing) |
-|     KITTI     | 32 |      768x256     |  [Google Drive](https://drive.google.com/drive/folders/1z91uK68D0NJOoWODm3_t1i7PGV6VitbN?usp=sharing) |
-|     KITTI     | 64 |      768x256     |  [Google Drive](https://drive.google.com/drive/folders/11VFBhycjLfycZI8IfL44pk9TwuqN8n0q?usp=sharing) |
-|    Flowers    | 32 |      512x384     |  [Google Drive](https://drive.google.com/drive/folders/10BHWynkL1XYMjGMtCwtUJ0zsIhhpMOnv?usp=sharing) |
-|    Flowers    | 64 |      512x384     |  [Google Drive](https://drive.google.com/drive/folders/1kjhGrLznurjaBk5zcibyMSG2UC7Hb-jr?usp=sharing) |
-
-To run the models, download the checkpoint and the hyper-parameter yaml file and place them in the same directory, then run the following script:
-```
-python3 visualizations/image_to_video.py --checkpoint_path MINE_realestate10k_384x256_monodepth2_N64/checkpoint.pth --gpus 0 --data_path visualizations/home.jpg --output_dir .
-```
-
-
-## Citation
-
-If you find our work helpful to your research, please cite our paper:
-```
-@inproceedings{mine2021,
-  title={MINE: Towards Continuous Depth MPI with NeRF for Novel View Synthesis},
-  author={Jiaxin Li and Zijian Feng and Qi She and Henghui Ding and Changhu Wang and Gim Hee Lee},
-  year={2021},
-  booktitle={ICCV},
-}
-```
