@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 import torch.distributed as dist
 from torch.utils.tensorboard import SummaryWriter
 
-from synthesis_task import SynthesisTask
+from synthesis_task_multiview import SynthesisTask
 from utils import run_shell_cmd
 
 
@@ -70,10 +70,10 @@ config["global_rank"] = global_rank
 
 def get_dataset(config, logger):
     # Init data loader
-    assert config["data.name"] in ["llff", "realestate10k","shapenet", "flowers", "kitti_raw", "dtu"]
+    assert config["data.name"] in ["llff"]
 
     if config["data.name"] == "llff":
-        from input_pipelines.llff.nerf_dataset import NeRFDataset
+        from input_pipelines.llff.nerf_dataset_mv import NeRFDataset
         train_dataset = NeRFDataset(config,
                                     logger,
                                     root=config["data.training_set_path"],
@@ -101,52 +101,52 @@ def get_dataset(config, logger):
                                      collate_fn=val_dataset.collate_fn)
         return train_data_loader, val_data_loader
 
-    elif config["data.name"] == "kitti_raw":
-        from input_pipelines.kitti_raw.nerf_dataset import NeRFDataset
-        train_dataset = NeRFDataset(config,
-                                    logger,
-                                    root=config["data.training_set_path"],
-                                    is_validation=False,
-                                    img_size=(config["data.img_w"], config["data.img_h"]))
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-        # print(train_dataset)
-        train_data_loader = DataLoader(train_dataset, batch_size=config["data.per_gpu_batch_size"],
-                                       drop_last=True, num_workers=0,
-                                       sampler=train_sampler)
-                                    #    collate_fn=train_dataset.collate_fn)
+    # elif config["data.name"] == "kitti_raw":
+    #     from input_pipelines.kitti_raw.nerf_dataset import NeRFDataset
+    #     train_dataset = NeRFDataset(config,
+    #                                 logger,
+    #                                 root=config["data.training_set_path"],
+    #                                 is_validation=False,
+    #                                 img_size=(config["data.img_w"], config["data.img_h"]))
+    #     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    #     # print(train_dataset)
+    #     train_data_loader = DataLoader(train_dataset, batch_size=config["data.per_gpu_batch_size"],
+    #                                    drop_last=True, num_workers=0,
+    #                                    sampler=train_sampler)
+    #                                 #    collate_fn=train_dataset.collate_fn)
 
-        val_dataset = NeRFDataset(config,
-                                  logger,
-                                  root=config["data.training_set_path"],
-                                  is_validation=True,
-                                  img_size=(config["data.img_w"], config["data.img_h"]))
-        val_data_loader = DataLoader(val_dataset, batch_size=config["data.per_gpu_batch_size"],
-                                     shuffle=False, drop_last=False, num_workers=0)
-                                    #  collate_fn=val_dataset.collate_fn)
-        return train_data_loader, val_data_loader
-    elif config["data.name"] == "shapenet":
-        from input_pipelines.shapenet.nerf_dataset import NeRFDataset
-        train_dataset = NeRFDataset(config,
-                                    logger,
-                                    root=config["data.training_set_path"],
-                                    is_validation=False,
-                                    img_size=(config["data.img_w"], config["data.img_h"]))
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-        # print(train_dataset)
-        train_data_loader = DataLoader(train_dataset, batch_size=config["data.per_gpu_batch_size"],
-                                       drop_last=True, num_workers=0,
-                                       sampler=train_sampler)
-                                    #    collate_fn=train_dataset.collate_fn)
+    #     val_dataset = NeRFDataset(config,
+    #                               logger,
+    #                               root=config["data.training_set_path"],
+    #                               is_validation=True,
+    #                               img_size=(config["data.img_w"], config["data.img_h"]))
+    #     val_data_loader = DataLoader(val_dataset, batch_size=config["data.per_gpu_batch_size"],
+    #                                  shuffle=False, drop_last=False, num_workers=0)
+    #                                 #  collate_fn=val_dataset.collate_fn)
+    #     return train_data_loader, val_data_loader
+    # elif config["data.name"] == "shapenet":
+    #     from input_pipelines.shapenet.nerf_dataset import NeRFDataset
+    #     train_dataset = NeRFDataset(config,
+    #                                 logger,
+    #                                 root=config["data.training_set_path"],
+    #                                 is_validation=False,
+    #                                 img_size=(config["data.img_w"], config["data.img_h"]))
+    #     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    #     # print(train_dataset)
+    #     train_data_loader = DataLoader(train_dataset, batch_size=config["data.per_gpu_batch_size"],
+    #                                    drop_last=True, num_workers=0,
+    #                                    sampler=train_sampler)
+    #                                 #    collate_fn=train_dataset.collate_fn)
 
-        val_dataset = NeRFDataset(config,
-                                  logger,
-                                  root=config["data.training_set_path"],
-                                  is_validation=True,
-                                  img_size=(config["data.img_w"], config["data.img_h"]))
-        val_data_loader = DataLoader(val_dataset, batch_size=config["data.per_gpu_batch_size"],
-                                     shuffle=False, drop_last=False, num_workers=0)
-                                    #  collate_fn=val_dataset.collate_fn)
-        return train_data_loader, val_data_loader
+    #     val_dataset = NeRFDataset(config,
+    #                               logger,
+    #                               root=config["data.training_set_path"],
+    #                               is_validation=True,
+    #                               img_size=(config["data.img_w"], config["data.img_h"]))
+    #     val_data_loader = DataLoader(val_dataset, batch_size=config["data.per_gpu_batch_size"],
+    #                                  shuffle=False, drop_last=False, num_workers=0)
+    #                                 #  collate_fn=val_dataset.collate_fn)
+    #     return train_data_loader, val_data_loader
     else:
         raise NotImplementedError
 

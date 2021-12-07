@@ -44,7 +44,8 @@ def plane_volume_rendering(rgb_BS3HW, sigma_BS1HW, xyz_BS3HW, is_bg_depth_inf):
 
     xyz_diff_BS3HW = xyz_BS3HW[:, 1:, :, :, :] - xyz_BS3HW[:, 0:-1, :, :, :]  # Bx(S-1)x3xHxW
     xyz_dist_BS1HW = torch.norm(xyz_diff_BS3HW, dim=2, keepdim=True)  # Bx(S-1)x1xHxW
-
+    # print(xyz_dist_BS1HW.size(),"SIZEEEEEEEE")
+    # print(H,W)
     xyz_dist_BS1HW = torch.cat((xyz_dist_BS1HW,
                                 torch.full((B, 1, 1, H, W),
                                            fill_value=1e3,
@@ -150,7 +151,7 @@ def get_src_xyz_from_plane_disparity(meshgrid_src_homo,
     B, S = mpi_disparity_src.size()
     H, W = meshgrid_src_homo.size(1), meshgrid_src_homo.size(2)
     mpi_depth_src = torch.reciprocal(mpi_disparity_src)  # BxS
-
+    # print(K_src_inv.size())
     K_src_inv_Bs33 = K_src_inv.unsqueeze(1).repeat(1, S, 1, 1).reshape(B * S, 3, 3)
 
     # 3xHxW -> BxSx3xHxW
@@ -177,7 +178,179 @@ def get_tgt_xyz_from_plane_disparity(xyz_src_BS3HW,
     xyz_tgt_BS3HW = xyz_tgt.reshape(B, S, 3, H, W)  # BxSx3xHxW
     return xyz_tgt_BS3HW
 
+def render_tgt_rgb_depth_mv(H_sampler: HomographySample,
+                         all_mpi_rgb_src,
+                         all_mpi_sigma_src,
+                         all_mpi_disparity_src,
+                         all_xyz_tgt_BS3HW,
+                         all_G_tgt_src,
+                         all_K_src_inv, K_tgt,
+                         use_alpha=False,
+                         is_bg_depth_inf=False):
+    """
+    :param H_sampler:
+    :param mpi_rgb_src: BxSx3xHxW
+    :param mpi_sigma_src: BxSx1xHxW
+    :param mpi_disparity_src: BxS
+    :param xyz_tgt_BS3HW: BxSx3xHxW
+    :param G_tgt_src: Bx4x4
+    :param K_src_inv: Bx3x3
+    :param K_tgt: Bx3x3
+    :return:
+    """
+    B, S, _, H, W = all_mpi_rgb_src[0].size()
+    tgt_mpi_xyz_mv = torch.empty(B, S, 7, H, W)
+    tgt_mask_mv = torch.ones(B, 1, H, W)
+    for i in range(len(all_mpi_rgb_src)):
+        mpi_rgb_src = all_mpi_rgb_src[i]
+        mpi_disparity_src = all_mpi_disparity_src[i]
+        mpi_sigma_src = all_mpi_sigma_src[i]
+        xyz_tgt_BS3HW = all_xyz_tgt_BS3HW[i]
+        G_tgt_src = all_G_tgt_src[i]
+        K_src_inv = all_K_src_inv[i]
+        B, S, _, H, W = mpi_rgb_src.size()
 
+        mpi_depth_src = torch.reciprocal(mpi_disparity_src)  # BxS
+
+        # note that here we concat the mpi_src with xyz_tgt, because H_sampler will sample them for tgt frame
+        # mpi_src is the same in whatever frame, but xyz has to be in tgt frame
+        mpi_xyz_src = torch.cat((mpi_rgb_src, mpi_sigma_src, xyz_tgt_BS3HW), dim=2)  # BxSx(3+1+3)xHxW
+
+        # homography warping of mpi_src into tgt frame
+        G_tgt_src_Bs44 = G_tgt_src.unsqueeze(1).repeat(1, S, 1, 1).contiguous().reshape(B*S, 4, 4)  # Bsx4x4
+        K_src_inv_Bs33 = K_src_inv.unsqueeze(1).repeat(1, S, 1, 1).contiguous().reshape(B*S, 3, 3)  # Bsx3x3
+        K_tgt_Bs33 = K_tgt.unsqueeze(1).repeat(1, S, 1, 1).contiguous().reshape(B*S, 3, 3)  # Bsx3x3
+
+        # BsxCxHxW, BsxHxW
+        tgt_mpi_xyz_BsCHW, tgt_mask_BsHW = H_sampler.sample(mpi_xyz_src.view(B*S, 7, H, W),
+                                                            mpi_depth_src.view(B*S),
+                                                            G_tgt_src_Bs44,
+                                                            K_src_inv_Bs33,
+                                                            K_tgt_Bs33)
+
+        # mpi composition
+        tgt_mpi_xyz = tgt_mpi_xyz_BsCHW.view(B, S, 7, H, W)
+        tgt_mask_BSHW = tgt_mask_BsHW.view(B, S, H, W)
+        tgt_mask_BSHW = torch.where(tgt_mask_BSHW,
+                                torch.ones((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device),
+                                torch.zeros((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device))
+        tgt_mask = torch.sum(tgt_mask_BSHW, dim=1, keepdim=True)  # Bx1xHxW
+        if (i==0):
+            tgt_mpi_xyz_mv =torch.unsqueeze(tgt_mpi_xyz,dim=1)
+            tgt_mask_mv = tgt_mask
+        else:
+            tgt_mpi_xyz_mv = torch.cat([tgt_mpi_xyz_mv,torch.unsqueeze(tgt_mpi_xyz,dim=1)],dim=1)
+            tgt_mask_mv = torch.logical_and(tgt_mask_mv,tgt_mask)
+
+    
+    tgt_rgb_BS3HW = tgt_mpi_xyz_mv[:,:, :, 0:3, :, :].mean(dim=1,keepdim=False)
+    tgt_sigma_BS1HW = tgt_mpi_xyz_mv[:,:, :, 3:4, :, :].mean(dim=1,keepdim=False)
+    # To DO Change this to another better implementation
+    tgt_xyz_BS3HW = tgt_mpi_xyz_mv[:,:, :, 4:, :, :].mean(dim=1,keepdim=False)
+
+    # tgt_mask_BSHW = tgt_mask_BsHW.view(B, S, H, W)
+    # tgt_mask_BSHW = torch.where(tgt_mask_BSHW,
+    #                             torch.ones((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device),
+    #                             torch.zeros((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device))
+
+    # Bx3xHxW, Bx1xHxW, Bx1xHxW
+    tgt_z_BS1HW = tgt_xyz_BS3HW[:, :, -1:]
+    tgt_sigma_BS1HW = torch.where(tgt_z_BS1HW >= 0,
+                                  tgt_sigma_BS1HW,
+                                  torch.zeros_like(tgt_sigma_BS1HW, device=tgt_sigma_BS1HW.device))
+    tgt_rgb_syn, tgt_depth_syn, _, _ = render(tgt_rgb_BS3HW, tgt_sigma_BS1HW, tgt_xyz_BS3HW,
+                                              use_alpha=use_alpha,
+                                              is_bg_depth_inf=is_bg_depth_inf)
+    # tgt_mask = torch.sum(tgt_mask_BSHW, dim=1, keepdim=True)  # Bx1xHxW
+
+    return tgt_rgb_syn, tgt_depth_syn, tgt_mask_mv
+
+def render_tgt_rgb_depth_mv_llff(H_sampler: HomographySample,
+                         all_mpi_rgb_src,
+                         all_mpi_sigma_src,
+                         all_mpi_disparity_src,
+                         all_xyz_tgt_BS3HW,
+                         all_G_tgt_src,
+                         all_K_src_inv, K_tgt,
+                         use_alpha=False,
+                         is_bg_depth_inf=False):
+    """
+    :param H_sampler:
+    :param mpi_rgb_src: BxSx3xHxW
+    :param mpi_sigma_src: BxSx1xHxW
+    :param mpi_disparity_src: BxS
+    :param xyz_tgt_BS3HW: BxSx3xHxW
+    :param G_tgt_src: Bx4x4
+    :param K_src_inv: Bx3x3
+    :param K_tgt: Bx3x3
+    :return:
+    """
+    B, S, _, H, W = all_mpi_rgb_src[0].size()
+    tgt_mpi_xyz_mv = torch.empty(B, S, 7, H, W)
+    tgt_mask_mv = torch.ones(B, 1, H, W)
+    for i in range(len(all_mpi_rgb_src)):
+        mpi_rgb_src = all_mpi_rgb_src[i]
+        mpi_disparity_src = all_mpi_disparity_src[i]
+        mpi_sigma_src = all_mpi_sigma_src[i]
+        xyz_tgt_BS3HW = all_xyz_tgt_BS3HW[i]
+        G_tgt_src = all_G_tgt_src[i]
+        K_src_inv = all_K_src_inv[i]
+        B, S, _, H, W = mpi_rgb_src.size()
+
+        mpi_depth_src = torch.reciprocal(mpi_disparity_src)  # BxS
+
+        # note that here we concat the mpi_src with xyz_tgt, because H_sampler will sample them for tgt frame
+        # mpi_src is the same in whatever frame, but xyz has to be in tgt frame
+        mpi_xyz_src = torch.cat((mpi_rgb_src, mpi_sigma_src, xyz_tgt_BS3HW), dim=2)  # BxSx(3+1+3)xHxW
+
+        # homography warping of mpi_src into tgt frame
+        G_tgt_src_Bs44 = G_tgt_src.unsqueeze(1).repeat(1, S, 1, 1).contiguous().reshape(B*S, 4, 4)  # Bsx4x4
+        K_src_inv_Bs33 = K_src_inv.unsqueeze(1).repeat(1, S, 1, 1).contiguous().reshape(B*S, 3, 3)  # Bsx3x3
+        K_tgt_Bs33 = K_tgt.unsqueeze(1).repeat(1, S, 1, 1).contiguous().reshape(B*S, 3, 3)  # Bsx3x3
+
+        # BsxCxHxW, BsxHxW
+        tgt_mpi_xyz_BsCHW, tgt_mask_BsHW = H_sampler.sample(mpi_xyz_src.view(B*S, 7, H, W),
+                                                            mpi_depth_src.view(B*S),
+                                                            G_tgt_src_Bs44,
+                                                            K_src_inv_Bs33,
+                                                            K_tgt_Bs33)
+
+        # mpi composition
+        tgt_mpi_xyz = tgt_mpi_xyz_BsCHW.view(B, S, 7, H, W)
+        tgt_mask_BSHW = tgt_mask_BsHW.view(B, S, H, W)
+        tgt_mask_BSHW = torch.where(tgt_mask_BSHW,
+                                torch.ones((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device),
+                                torch.zeros((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device))
+        tgt_mask = torch.sum(tgt_mask_BSHW, dim=1, keepdim=True)  # Bx1xHxW
+        if (i==0):
+            tgt_mpi_xyz_mv =torch.unsqueeze(tgt_mpi_xyz,dim=1)
+            tgt_mask_mv = tgt_mask
+        else:
+            tgt_mpi_xyz_mv = torch.cat([tgt_mpi_xyz_mv,torch.unsqueeze(tgt_mpi_xyz,dim=1)],dim=1)
+            tgt_mask_mv = torch.logical_and(tgt_mask_mv,tgt_mask)
+
+    
+    tgt_rgb_BS3HW = tgt_mpi_xyz_mv[:,:, :, 0:3, :, :].mean(dim=1,keepdim=False)
+    tgt_sigma_BS1HW = tgt_mpi_xyz_mv[:,:, :, 3:4, :, :].mean(dim=1,keepdim=False)
+    # To DO Change this to another better implementation
+    tgt_xyz_BS3HW = tgt_mpi_xyz_mv[:,:, :, 4:, :, :].mean(dim=1,keepdim=False)
+
+    # tgt_mask_BSHW = tgt_mask_BsHW.view(B, S, H, W)
+    # tgt_mask_BSHW = torch.where(tgt_mask_BSHW,
+    #                             torch.ones((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device),
+    #                             torch.zeros((B, S, H, W), dtype=torch.float32, device=mpi_rgb_src.device))
+
+    # Bx3xHxW, Bx1xHxW, Bx1xHxW
+    tgt_z_BS1HW = tgt_xyz_BS3HW[:, :, -1:]
+    tgt_sigma_BS1HW = torch.where(tgt_z_BS1HW >= 0,
+                                  tgt_sigma_BS1HW,
+                                  torch.zeros_like(tgt_sigma_BS1HW, device=tgt_sigma_BS1HW.device))
+    tgt_rgb_syn, tgt_depth_syn, _, _ = render(tgt_rgb_BS3HW, tgt_sigma_BS1HW, tgt_xyz_BS3HW,
+                                              use_alpha=use_alpha,
+                                              is_bg_depth_inf=is_bg_depth_inf)
+    # tgt_mask = torch.sum(tgt_mask_BSHW, dim=1, keepdim=True)  # Bx1xHxW
+
+    return tgt_rgb_syn, tgt_depth_syn, tgt_mask_mv
 def render_tgt_rgb_depth(H_sampler: HomographySample,
                          mpi_rgb_src,
                          mpi_sigma_src,

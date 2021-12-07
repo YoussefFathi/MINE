@@ -65,7 +65,7 @@ class SynthesisTask():
         self.embedder, out_dim = get_embedder(config["model.pos_encoding_multires"])
 
         # Init model
-        self.backbone = ResnetEncoder(num_layers=50,
+        self.backbone = ResnetEncoder(num_layers=18,
                                       pretrained=config.get("model.imagenet_pretrained", True)).to(device=torch.device("cuda:0"))
         self.decoder = DepthDecoder(
             # Common params
@@ -145,18 +145,22 @@ class SynthesisTask():
             "loss": AverageMeter("train_loss"),
             "loss_rgb_src": AverageMeter("train_loss_rgb_src"),
             "loss_ssim_src": AverageMeter("train_loss_ssim_src"),
+            "loss_disp_pt3dsrc": AverageMeter("train_loss_disp_pt3dsrc"),
             "loss_rgb_tgt": AverageMeter("train_loss_rgb_tgt"),
             "loss_ssim_tgt": AverageMeter("train_loss_ssim_tgt"),
             "lpips_tgt": AverageMeter("train_lpips_tgt"),
             "psnr_tgt": AverageMeter("train_psnr_tgt"),
+            "loss_disp_pt3dtgt": AverageMeter("train_loss_disp_pt3dtgt"),
         }
         self.val_losses = {
             "loss_rgb_src": AverageMeter("val_loss_rgb_src"),
             "loss_ssim_src": AverageMeter("val_loss_ssim_src"),
+            "loss_disp_pt3dsrc": AverageMeter("val_loss_disp_pt3dsrc"),
             "loss_rgb_tgt": AverageMeter("val_loss_rgb_tgt"),
             "loss_ssim_tgt": AverageMeter("val_loss_ssim_tgt"),
             "lpips_tgt": AverageMeter("val_lpips_tgt"),
             "psnr_tgt": AverageMeter("val_psnr_tgt"),
+            "loss_disp_pt3dtgt": AverageMeter("val_loss_disp_pt3dtgt"),
         }
 
         self.current_epoch = 0
@@ -164,42 +168,41 @@ class SynthesisTask():
 
     def init_data(self, device):
         B, H, W = self.config["data.per_gpu_batch_size"], self.config["data.img_h"], self.config["data.img_w"]
-        L = self.config["data.num_tgt_views"]
-        # N_pt = self.config["data.visible_point_count"]
-        self.src_imgs = torch.zeros((B, 3, H, W), dtype=torch.float32, device=device)
-        self.K_src = torch.zeros((B, 3, 3), dtype=torch.float32, device=device)
-        self.K_src_inv = torch.zeros((B, 3, 3), dtype=torch.float32, device=device)
-        # self.pt3d_src = torch.zeros((B, 3, N_pt), dtype=torch.float32, device=device)
+        L = self.config["data.num_src_views"]
+        N_pt = self.config["data.visible_point_count"]
+        self.src_imgs = torch.zeros((B,L, 3, H, W), dtype=torch.float32, device=device)
+        self.K_src = torch.zeros((B,L, 3, 3), dtype=torch.float32, device=device)
+        self.K_src_inv = torch.zeros((B,L, 3, 3), dtype=torch.float32, device=device)
+        self.pt3d_src = torch.zeros((B,L, 3, N_pt), dtype=torch.float32, device=device)
+        self.G_src_tgt = torch.zeros((B,L, 4, 4), dtype=torch.float32, device=device)
 
         self.tgt_imgs = torch.zeros((B, 3, H, W), dtype=torch.float32, device=device)
-        self.G_src_tgt = torch.zeros((B, 4, 4), dtype=torch.float32, device=device)
         self.K_tgt = torch.zeros((B, 3, 3), dtype=torch.float32, device=device)
         self.K_tgt_inv = torch.zeros((B, 3, 3), dtype=torch.float32, device=device)
-        # self.pt3d_tgt = torch.zeros((B, L, 3, N_pt), dtype=torch.float32, device=device)
+        self.pt3d_tgt = torch.zeros((B, 3, N_pt), dtype=torch.float32, device=device)
 
     def set_data(self, items):
         src_items, tgt_items = items
-
+        # print(src_items["img"].size(),"IMGS")
         self.src_imgs.resize_as_(src_items["img"]).copy_(src_items["img"])  # Bx3xHxW
         self.K_src.resize_as_(src_items["K"]).copy_(src_items["K"])  # Bx3x3
         self.K_src_inv.resize_as_(src_items["K_inv"]).copy_(src_items["K_inv"])
-        # self.pt3d_src.resize_as_(src_items["xyzs"]).copy_(src_items["xyzs"])  # Bx3xN_pt
+        self.pt3d_src.resize_as_(src_items["xyzs"]).copy_(src_items["xyzs"])  # Bx3xN_pt
+        self.G_src_tgt.resize_as_(src_items["G_src_tgt"]).copy_(src_items["G_src_tgt"])  # BxLx4x4
 
         self.tgt_imgs.resize_as_(tgt_items["img"]).copy_(tgt_items["img"])  # BxLx3xHxW
-        self.G_src_tgt.resize_as_(tgt_items["G_src_tgt"]).copy_(tgt_items["G_src_tgt"])  # BxLx4x4
         self.K_tgt.resize_as_(tgt_items["K"]).copy_(tgt_items["K"])  # BxLx3x3
         self.K_tgt_inv.resize_as_(tgt_items["K_inv"]).copy_(tgt_items["K_inv"])  # BxLx3x3
-        # self.pt3d_tgt.resize_as_(tgt_items["xyzs"]).copy_(tgt_items["xyzs"])  # BxLx3xN_pt
-        # print(self.src_imgs,"#####################SRC##########################")
+        self.pt3d_tgt.resize_as_(tgt_items["xyzs"]).copy_(tgt_items["xyzs"])  # BxLx3xN_pt
+
         # L = self.tgt_imgs.size(1)
 
-        # # # in current setting, memory consumption is huge, only one supervision is allowed
+        # # in current setting, memory consumption is huge, only one supervision is allowed
         # assert L == 1
         # self.tgt_imgs = self.tgt_imgs.squeeze(1)
         # self.G_src_tgt = self.G_src_tgt.squeeze(1)
         # self.K_tgt = self.K_tgt.squeeze(1)
         # self.K_tgt_inv = self.K_tgt_inv.squeeze(1)
-        # print(self.K_tgt_inv.size())
         # self.pt3d_tgt = self.pt3d_tgt.squeeze(1)
 
         self.G_tgt_src = inverse(self.G_src_tgt)
@@ -207,9 +210,9 @@ class SynthesisTask():
 
     def compute_scale_factor(self, disparity_syn_pt3dsrc, pt3d_disp_src):
         B = pt3d_disp_src.size()[0]
-        if self.config["data.name"] in ["flowers","shapenet", "kitti_raw", "dtu"]:
+        if self.config["data.name"] in ["flowers", "kitti_raw", "dtu"]:
             return torch.ones(B, dtype=torch.float32).cuda()
-
+        
         # 1. calibrate the scale between the src image/depth and our synthesized image/depth
         scale_factor = torch.exp(torch.mean(
             torch.log(disparity_syn_pt3dsrc) - torch.log(pt3d_disp_src),
@@ -228,100 +231,131 @@ class SynthesisTask():
                            mpi_all_src, disparity_all_src,
                            scale_factor=None,
                            is_val=False):
-        src_imgs_scaled = self.upsample_list[scale](self.src_imgs)
-        tgt_imgs_scaled = self.upsample_list[scale](self.tgt_imgs)
-        B, _, H_img_scaled, W_img_scaled = src_imgs_scaled.size()
+        B, L,_, _,_ = self.src_imgs.size()
+        disp_lambda = 0.0 if self.config["data.name"] in ["flowers", "kitti_raw", "dtu"] else 1.0
+        smoothness_lambda_v1 = self.config.get("loss.smoothness_lambda_v1", 0.5)
+        smoothness_lambda_v2 = self.config.get("loss.smoothness_lambda_v2", 1.0)
+        #Define Losses for each src image
+        loss_disp_pt3dsrc = 0
+        loss_rgb_src = 0
+        loss_ssim_src = 0
+        loss_smooth_src = 0
+        #Define containers for src image objects for mutli-view mpi fusion
+        mv_mpi_all_rgb_src = list()
+        mv_mpi_all_sigma_src = list()
+        mv_disparity_all_src = list()
+        mv_G_tgt_src = list()
+        mv_K_src_scaled_inv = list()
+        mv_scale_factor = list()
+        for src_view_idx in range(L):
+            # print(f"IN View {src_view_idx} in Scale {scale}")
+            src_imgs_scaled = self.upsample_list[scale](self.src_imgs[:,src_view_idx,...])
+            tgt_imgs_scaled = self.upsample_list[scale](self.tgt_imgs)
+            B, _, H_img_scaled,W_img_scaled = src_imgs_scaled.size()
 
-        K_src_scaled = self.K_src / (2 ** scale)
-        K_src_scaled[:, 2, 2] = 1
-        K_tgt_scaled = self.K_tgt / (2 ** scale)
-        K_tgt_scaled[:, 2, 2] = 1
-        # TODO: sometimes it returns identity, unless there is CUDA_LAUNCH_BLOCKING=1
-        torch.cuda.synchronize()
-        K_src_scaled_inv = torch.inverse(K_src_scaled)
+            K_src_scaled = self.K_src[:,src_view_idx,...] / (2 ** scale)
+            K_src_scaled[:, 2, 2] = 1
+            K_tgt_scaled = self.K_tgt / (2 ** scale)
+            K_tgt_scaled[:, 2, 2] = 1
+            # TODO: sometimes it returns identity, unless there is CUDA_LAUNCH_BLOCKING=1
+            torch.cuda.synchronize()
+            K_src_scaled_inv = torch.inverse(K_src_scaled)
 
-        # compute xyz for src and tgt
-        # here we need to ensure mpi resolution == image resolution
-        assert mpi_all_src.size(3) == H_img_scaled, mpi_all_src.size(4) == W_img_scaled
-        xyz_src_BS3HW = mpi_rendering.get_src_xyz_from_plane_disparity(
-            self.homography_sampler_list[scale].meshgrid,
-            disparity_all_src,
-            K_src_scaled_inv
-        )
+            # compute xyz for src and tgt
+            # here we need to ensure mpi resolution == image resolution
+            assert mpi_all_src[src_view_idx][scale].size(3) == H_img_scaled, mpi_all_src[src_view_idx][scale].size(4) == W_img_scaled
+            xyz_src_BS3HW = mpi_rendering.get_src_xyz_from_plane_disparity(
+                self.homography_sampler_list[scale].meshgrid,
+                disparity_all_src[src_view_idx],
+                K_src_scaled_inv
+            )
 
-        # compose depth_src
-        # here is blend_weights means how much this plane is visible from the camera, BxSx1xHxW
-        # e.g, blend_weights = 0 means it is invisible from the camera
-        mpi_all_rgb_src = mpi_all_src[:, :, 0:3, :, :]  # BxSx3xHxW
-        mpi_all_sigma_src = mpi_all_src[:, :, 3:, :, :]  # BxSx1xHxW
-        src_imgs_syn, src_depth_syn, blend_weights, weights = mpi_rendering.render(
-            mpi_all_rgb_src,
-            mpi_all_sigma_src,
-            xyz_src_BS3HW,
-            use_alpha=self.config.get("mpi.use_alpha", False),
-            is_bg_depth_inf=self.config.get("mpi.render_tgt_rgb_depth", False)
-        )
-        if self.config.get("training.src_rgb_blending", True):
-            mpi_all_rgb_src = blend_weights * src_imgs_scaled.unsqueeze(1) + (1 - blend_weights) * mpi_all_rgb_src
-            src_imgs_syn, src_depth_syn = mpi_rendering.weighted_sum_mpi(
+            # compose depth_src
+            # here is blend_weights means how much this plane is visible from the camera, BxSx1xHxW
+            # e.g, blend_weights = 0 means it is invisible from the camera
+            mpi_all_rgb_src = mpi_all_src[src_view_idx][scale][:, :, 0:3, :, :]  # BxSx3xHxW
+            mpi_all_sigma_src = mpi_all_src[src_view_idx][scale][:, :, 3:, :, :]  # BxSx1xHxW
+            src_imgs_syn, src_depth_syn, blend_weights, weights = mpi_rendering.render( # Volumetric Rendering on MPI of each source image
                 mpi_all_rgb_src,
+                mpi_all_sigma_src,
                 xyz_src_BS3HW,
-                weights,
+                use_alpha=self.config.get("mpi.use_alpha", False),
                 is_bg_depth_inf=self.config.get("mpi.render_tgt_rgb_depth", False)
             )
-        src_disparity_syn = torch.reciprocal(src_depth_syn)
+            if self.config.get("training.src_rgb_blending", True):
+                mpi_all_rgb_src = blend_weights * src_imgs_scaled.unsqueeze(1) + (1 - blend_weights) * mpi_all_rgb_src
+                src_imgs_syn, src_depth_syn = mpi_rendering.weighted_sum_mpi(
+                    mpi_all_rgb_src,
+                    xyz_src_BS3HW,
+                    weights,
+                    is_bg_depth_inf=self.config.get("mpi.render_tgt_rgb_depth", False)
+                )
+            src_disparity_syn = torch.reciprocal(src_depth_syn)
 
-        # compute scale factor
-        # src_pt3d_disp = torch.reciprocal(self.pt3d_src[:, 2:, :])  # Bx1xN_pt
-        # src_pt3d_pxpy = torch.matmul(K_src_scaled, self.pt3d_src)  # Bx3x3 * Bx3xN_pt -> Bx3xN_pt
-        # src_pt3d_pxpy = src_pt3d_pxpy[:, 0:2, :] / src_pt3d_pxpy[:, 2:, :]  # Bx2xN_pt
-        # src_pt3d_disp_syn = rendering_utils.gather_pixel_by_pxpy(src_disparity_syn, src_pt3d_pxpy)  # Bx1xN_pt
-        # if scale_factor is None:
-        scale_factor = torch.ones(B, dtype=torch.float32).cuda()  # B
+            # compute scale factor
+            # print(self.pt3d_src.size(),"PTS BEFORE")
+            src_pt3d_disp = torch.reciprocal(self.pt3d_src[:,src_view_idx,2:,...])  # Bx1xN_pt
+            src_pt3d_pxpy = torch.matmul(K_src_scaled, self.pt3d_src[:,src_view_idx,...])  # Bx3x3 * Bx3xN_pt -> Bx3xN_pt
+            src_pt3d_pxpy = src_pt3d_pxpy[:, 0:2, :] / src_pt3d_pxpy[:, 2:, :]  # Bx2xN_pt
+            src_pt3d_disp_syn = rendering_utils.gather_pixel_by_pxpy(src_disparity_syn, src_pt3d_pxpy)  # Bx1xN_pt
+            # print(scale_factor,"SCALE")
+            if scale_factor is None:
+                # print(src_pt3d_disp_syn.size(),"DISPARITY")
+                # print(src_pt3d_disp.size(),"PTS DISP")
+                scale_factor = self.compute_scale_factor(src_pt3d_disp_syn, src_pt3d_disp)  # B
 
+            
+            # 1. disparity at src frame
+            # compute pixel coordinates of gt points
+            # print(scale_factor.size(),"SIZEEEEEEEEEEEEEEEEEEEE")
+            # print(src_pt3d_disp_syn.size(),"SIZEEEEEEEEE2")
+
+            src_pt3d_disp_syn_scaled = src_pt3d_disp_syn / scale_factor.view(B, 1, 1)
+            loss_disp_pt3dsrc += disp_lambda * torch.mean(torch.abs(
+                torch.log(src_pt3d_disp_syn_scaled) - torch.log(src_pt3d_disp)))
+
+            with torch.no_grad():
+                loss_rgb_src += torch.mean(torch.abs(src_imgs_syn - src_imgs_scaled))
+                loss_ssim_src += 1 - self.ssim(src_imgs_syn, src_imgs_scaled)
+                loss_smooth_src += edge_aware_loss(src_imgs_scaled, src_disparity_syn,
+                                                gmin=self.config["loss.smoothness_gmin"],
+                                                grad_ratio=self.config.get("loss.smoothness_grad_ratio", 0.1))
+            mv_mpi_all_rgb_src.append(mpi_all_rgb_src)
+            mv_disparity_all_src.append(disparity_all_src[src_view_idx])
+            mv_mpi_all_sigma_src.append(mpi_all_sigma_src)
+            mv_G_tgt_src.append(self.G_tgt_src[:,src_view_idx,...])
+            mv_K_src_scaled_inv.append(K_src_scaled_inv)
+            mv_scale_factor.append(scale_factor)
+        K_tgt_scaled = self.K_tgt / (2 ** scale)
+        K_tgt_scaled[:, 2, 2] = 1
         # Render target view
-        render_results = self.render_novel_view(mpi_all_rgb_src, mpi_all_sigma_src,
-                                                disparity_all_src, self.G_tgt_src,
-                                                K_src_scaled_inv, K_tgt_scaled,
+        render_results = self.render_novel_view_from_mv(mv_mpi_all_rgb_src, mv_mpi_all_sigma_src,
+                                                mv_disparity_all_src, mv_G_tgt_src,
+                                                mv_K_src_scaled_inv, K_tgt_scaled,
                                                 scale=scale,
-                                                scale_factor=scale_factor)
+                                                scale_factor=mv_scale_factor)
         tgt_imgs_syn = render_results["tgt_imgs_syn"]
         tgt_disparity_syn = render_results["tgt_disparity_syn"]
         tgt_mask_syn = render_results["tgt_mask_syn"]
 
-        # build loss
-        # Read lambdas
-        disp_lambda = 0.0 if self.config["data.name"] in ["flowers","shapenet", "kitti_raw", "dtu"] else 1.0
-        smoothness_lambda_v1 = self.config.get("loss.smoothness_lambda_v1", 0.5)
-        smoothness_lambda_v2 = self.config.get("loss.smoothness_lambda_v2", 1.0)
+        
+       
 
-        with torch.no_grad():
-            loss_rgb_src = torch.mean(torch.abs(src_imgs_syn - src_imgs_scaled))
-            loss_ssim_src = 1 - self.ssim(src_imgs_syn, src_imgs_scaled)
-            loss_smooth_src = edge_aware_loss(src_imgs_scaled, src_disparity_syn,
-                                              gmin=self.config["loss.smoothness_gmin"],
-                                              grad_ratio=self.config.get("loss.smoothness_grad_ratio", 0.1))
-
-        # 1. disparity at src frame
-        # compute pixel coordinates of gt points
-        # src_pt3d_disp_syn_scaled = src_pt3d_disp_syn / scale_factor.view(B, 1, 1)
-        # loss_disp_pt3dsrc = disp_lambda * torch.mean(torch.abs(
-        #     torch.log(src_pt3d_disp_syn_scaled) - torch.log(src_pt3d_disp)))
 
         # disparity at tgt frame
-        # tgt_pt3d_disp = torch.reciprocal(self.pt3d_tgt[:, 2:, :])  # Bx1xN_pt
-        # tgt_pt3d_pxpy = torch.matmul(K_tgt_scaled, self.pt3d_tgt)  # Bx3x3 * Bx3xN_pt -> Bx3xN_pt
-        # tgt_pt3d_pxpy = tgt_pt3d_pxpy[:, 0:2, :] / tgt_pt3d_pxpy[:, 2:, :]  # Bx2xN_pt
-        # tgt_pt3d_disp_syn = rendering_utils.gather_pixel_by_pxpy(tgt_disparity_syn, tgt_pt3d_pxpy)  # Bx1xN_pt
-        # tgt_pt3d_disp_syn_scaled = tgt_pt3d_disp_syn / scale_factor.view(B, 1, 1)
-        # loss_disp_pt3dtgt = disp_lambda * torch.mean(torch.abs(
-        #     torch.log(tgt_pt3d_disp_syn_scaled) - torch.log(tgt_pt3d_disp)
-        # ))
+        tgt_pt3d_disp = torch.reciprocal(self.pt3d_tgt[:, 2:, :])  # Bx1xN_pt
+        tgt_pt3d_pxpy = torch.matmul(K_tgt_scaled, self.pt3d_tgt)  # Bx3x3 * Bx3xN_pt -> Bx3xN_pt
+        tgt_pt3d_pxpy = tgt_pt3d_pxpy[:, 0:2, :] / tgt_pt3d_pxpy[:, 2:, :]  # Bx2xN_pt
+        tgt_pt3d_disp_syn = rendering_utils.gather_pixel_by_pxpy(tgt_disparity_syn, tgt_pt3d_pxpy)  # Bx1xN_pt
+        tgt_pt3d_disp_syn_scaled = tgt_pt3d_disp_syn / scale_factor.view(B, 1, 1)
+        loss_disp_pt3dtgt = disp_lambda * torch.mean(torch.abs(
+            torch.log(tgt_pt3d_disp_syn_scaled) - torch.log(tgt_pt3d_disp)
+        ))
 
         # 2. rgb loss at tgt frame
         # some pixels in tgt frame is outside src FoV, here we can detect and ignore those pixels
         rgb_tgt_valid_mask = torch.ge(tgt_mask_syn, self.config["mpi.valid_mask_threshold"]).to(torch.float32)
-        loss_map = torch.abs(tgt_imgs_syn - tgt_imgs_scaled) * rgb_tgt_valid_mask
+        loss_map = torch.abs(tgt_imgs_syn - tgt_imgs_scaled) #* rgb_tgt_valid_mask
         loss_rgb_tgt = loss_map.mean()
 
         # Edge aware smoothless losses
@@ -342,13 +376,15 @@ class SynthesisTask():
 
             psnr_tgt = psnr(tgt_imgs_syn, tgt_imgs_scaled).mean()
 
-        loss =  loss_rgb_tgt + loss_ssim_tgt \
+        loss = loss_disp_pt3dtgt + loss_disp_pt3dsrc \
+            + loss_rgb_tgt + loss_ssim_tgt \
             + loss_smooth_tgt \
             + loss_smooth_src_v2 + loss_smooth_tgt_v2
 
         loss_dict = {"loss": loss,
                      "loss_rgb_src": loss_rgb_src,
                      "loss_ssim_src": loss_ssim_src,
+                     "loss_disp_pt3dsrc": loss_disp_pt3dsrc,
                      "loss_smooth_src": loss_smooth_src,
                      "loss_smooth_tgt": loss_smooth_tgt,
                      "loss_smooth_src_v2": loss_smooth_src_v2,
@@ -357,7 +393,7 @@ class SynthesisTask():
                      "loss_ssim_tgt": loss_ssim_tgt,
                      "lpips_tgt": lpips_tgt,
                      "psnr_tgt": psnr_tgt,
-                     }
+                     "loss_disp_pt3dtgt": loss_disp_pt3dtgt}
 
         visualization_dict = {"src_disparity_syn": src_disparity_syn,
                               "tgt_disparity_syn": tgt_disparity_syn,
@@ -378,7 +414,7 @@ class SynthesisTask():
         for scale in scale_list:
             loss_dict_tmp, visualization_dict_tmp, scale_factor = self.loss_fcn_per_scale(
                 scale,
-                endpoints["mpi_all_src_list"][scale],
+                endpoints["mpi_all_src_list"],
                 endpoints["disparity_all_src"],
                 scale_factor,
                 is_val=is_val
@@ -391,40 +427,90 @@ class SynthesisTask():
         for scale in scale_list[1:]:
             if self.config.get("training.use_multi_scale", True):
                 loss_dict["loss"] += (loss_dict_list[scale]["loss_rgb_tgt"] + loss_dict_list[scale]["loss_ssim_tgt"])
-  
+            loss_dict["loss"] += (loss_dict_list[scale]["loss_disp_pt3dsrc"] + loss_dict_list[scale]["loss_disp_pt3dtgt"])
             loss_dict["loss"] += (loss_dict_list[scale]["loss_smooth_src_v2"] + loss_dict_list[scale]["loss_smooth_tgt_v2"])
         return loss_dict, visualization_dict
 
     def network_forward(self):
         # configurations
-        B, H_img, W_img = self.src_imgs.size(0), self.src_imgs.size(2), self.src_imgs.size(3)
-        # N_pt = self.pt3d_src.size(2)
-        L = self.tgt_imgs.size(1)
+        B,L, H_img, W_img = self.src_imgs.size(0),self.src_imgs.size(1), self.src_imgs.size(3), self.src_imgs.size(4)
+        N_pt = self.pt3d_src.size(3)
+        # L = self.tgt_imgs.size(1)
         S_fine = self.config["mpi.num_bins_fine"]
 
         # decoder to get rgb + alpha at certain disparity
         # sample coarse disparity, BxS_coarse
         disparity_coarse_src = _get_disparity_list(self.config, B, device=self.src_imgs.device)
+        mv_mpi_all_src_list = list()
+        mv_disparity_all_src = list()
+        for i in range(L):
 
-        xyz_src_BS3HW_coarse = mpi_rendering.get_src_xyz_from_plane_disparity(
-            self.homography_sampler_list[0].meshgrid,
-            disparity_coarse_src,
-            self.K_src_inv
-        )
+            xyz_src_BS3HW_coarse = mpi_rendering.get_src_xyz_from_plane_disparity(
+                self.homography_sampler_list[0].meshgrid,
+                disparity_coarse_src,
+                self.K_src_inv[:,i,...]
+            )
 
-        # Extract MPI from network
-        mpi_all_src_list, disparity_all_src = mpi_rendering.predict_mpi_coarse_to_fine(
-            self.mpi_predictor,
-            self.src_imgs,
-            xyz_src_BS3HW_coarse,
-            disparity_coarse_src,
-            S_fine,
-            is_bg_depth_inf=self.config.get("mpi.render_tgt_rgb_depth", False)
-        )
+            # Extract MPI from network
+            mpi_all_src_list, disparity_all_src = mpi_rendering.predict_mpi_coarse_to_fine(
+                self.mpi_predictor,
+                self.src_imgs[:,i,...],
+                xyz_src_BS3HW_coarse,
+                disparity_coarse_src,
+                S_fine,
+                is_bg_depth_inf=self.config.get("mpi.render_tgt_rgb_depth", False)
+            )
+            mv_disparity_all_src.append(disparity_all_src)
+            mv_mpi_all_src_list.append(mpi_all_src_list)
 
         return {
-            "mpi_all_src_list": mpi_all_src_list,
-            "disparity_all_src": disparity_all_src
+            "mpi_all_src_list": mv_mpi_all_src_list,
+            "disparity_all_src": mv_disparity_all_src
+        }
+    def render_novel_view_from_mv(self, mpi_all_rgb_src, mpi_all_sigma_src,
+                          disparity_all_src, G_tgt_src,
+                          K_src_inv, K_tgt, scale=0, scale_factor=None):
+        all_xyz_src_BS3HW = list()
+        all_xyz_tgt_BS3HW = list()
+        for i in range(len(mpi_all_rgb_src)):
+
+            # Apply scale factor
+            if scale_factor[i] is not None:
+                with torch.no_grad():
+                    G_tgt_src_v = torch.clone(G_tgt_src[i])
+                    G_tgt_src_v[:, 0:3, 3] = G_tgt_src[i][:, 0:3, 3] / scale_factor[i].view(-1, 1)
+            
+            xyz_src_BS3HW = mpi_rendering.get_src_xyz_from_plane_disparity(
+                self.homography_sampler_list[scale].meshgrid,
+                disparity_all_src[i],
+                K_src_inv[i]
+            )
+
+            xyz_tgt_BS3HW = mpi_rendering.get_tgt_xyz_from_plane_disparity( # Point cloud 3D point coordinates of the target frame and their origin is the source frame
+                xyz_src_BS3HW,
+                G_tgt_src_v
+            )
+            all_xyz_src_BS3HW.append(xyz_src_BS3HW)
+            all_xyz_tgt_BS3HW.append(xyz_tgt_BS3HW)
+        # Bx1xHxW, Bx3xHxW, Bx1xHxW
+        tgt_imgs_syn, tgt_depth_syn, tgt_mask_syn = mpi_rendering.render_tgt_rgb_depth_mv(
+            self.homography_sampler_list[scale],
+            mpi_all_rgb_src,
+            mpi_all_sigma_src,
+            disparity_all_src,
+            all_xyz_tgt_BS3HW,
+            G_tgt_src,
+            K_src_inv,
+            K_tgt,
+            use_alpha=self.config.get("mpi.use_alpha", False),
+            is_bg_depth_inf=self.config.get("mpi.render_tgt_rgb_depth", False)
+        )
+        tgt_disparity_syn = torch.reciprocal(tgt_depth_syn)
+
+        return {
+            "tgt_imgs_syn": tgt_imgs_syn,
+            "tgt_disparity_syn": tgt_disparity_syn,
+            "tgt_mask_syn": tgt_mask_syn
         }
 
     def render_novel_view(self, mpi_all_rgb_src, mpi_all_sigma_src,
@@ -481,7 +567,7 @@ class SynthesisTask():
         with torch.no_grad():
             for step, items in enumerate(val_data_loader):
                 batch_count += 1
-                if self.config.get("global_rank", 0) == 0 and batch_count % 1000 == 0:
+                if self.config.get("global_rank", 0) == 0 and batch_count % 20 == 0:
                     self.logger.info("    Eval progress: {}/{}".format(batch_count,
                                                                        len(val_data_loader)))
 
@@ -502,8 +588,8 @@ class SynthesisTask():
         self.decoder.train()
 
     def log_val(self, step, loss_dict, visualization_dict):
-        B, H_img, W_img = self.src_imgs.size(0), self.src_imgs.size(2), self.src_imgs.size(3)
-        L = 1
+        B, H_img, W_img = self.src_imgs.size(0), self.src_imgs.size(3), self.src_imgs.size(4)
+        L = self.src_imgs.size(1)
 
         # loss logging
         for key, value in self.val_losses.items():
@@ -512,12 +598,11 @@ class SynthesisTask():
         # write images to tensorboard
         # write src image and gt_tgt, only once
         if self.global_step == self.config["training.eval_interval"]:
-            src_imgs_BL = self.src_imgs.unsqueeze(1).repeat(1, L, 1, 1, 1).reshape(B * L, 3, H_img,
-                                                                                   W_img).contiguous()
+            src_imgs_BL = self.src_imgs.reshape(B * L, 3, H_img,W_img).contiguous()
             src_imgs_BL_grid = torchvision.utils.make_grid(src_imgs_BL)
             self.tb_writer.add_image("00_src_images", src_imgs_BL_grid, step)
 
-            tgt_imgs_BL = self.tgt_imgs.reshape(B*L, 3, H_img, W_img).contiguous()
+            tgt_imgs_BL = self.tgt_imgs.reshape(B, 3, H_img, W_img).contiguous()
             gt_tgt_grid = torchvision.utils.make_grid(tgt_imgs_BL)
             self.tb_writer.add_image("01_gt_tgt_images", gt_tgt_grid, step)
 
@@ -544,10 +629,12 @@ class SynthesisTask():
 
     def log_training(self, epoch, step, global_step, dataset_length, loss_dict):
         loss = loss_dict["loss"]
+        loss_disp_pt3dsrc = loss_dict["loss_disp_pt3dsrc"]
         loss_rgb_tgt = loss_dict["loss_rgb_tgt"]
         loss_ssim_tgt = loss_dict["loss_ssim_tgt"]
         loss_rgb_src = loss_dict["loss_rgb_src"]
         loss_ssim_src = loss_dict["loss_ssim_src"]
+        loss_disp_pt3dtgt = loss_dict["loss_disp_pt3dtgt"]
         loss_smooth_src = loss_dict["loss_smooth_src"]
         loss_smooth_tgt = loss_dict["loss_smooth_tgt"]
 
@@ -556,18 +643,22 @@ class SynthesisTask():
             "        src: rgb = %.4f\n"
             "        src: ssim = %.4f\n"
             "        src: smooth = %.4f\n"
+            "        src: disp_pt3d = %.4f\n"
             "        tgt: rgb = %.4f\n"
             "        tgt: ssim = %.4f\n"
-            "        tgt: smooth = %.4f\n" %
+            "        tgt: smooth = %.4f\n"
+            "        tgt: disp_pt3d = %.4f" %
             (epoch, step, dataset_length, self.global_step,
              loss.item(), self.optimizer.param_groups[0]["lr"],
              loss_rgb_src.item(),
              loss_ssim_src.item(),
              loss_smooth_src.item(),
+             loss_disp_pt3dsrc.item(),
              loss_rgb_tgt.item(),
              loss_ssim_tgt.item(),
              loss_smooth_tgt.item(),
-        ))
+             loss_disp_pt3dtgt.item())
+        )
 
         # Write losses to tensorboard
         # Update avg meters
@@ -604,7 +695,7 @@ class SynthesisTask():
             self.optimizer.step()
 
             # logging
-            if step > 0 and step % 500 == 0 and self.config["global_rank"] == 0:
+            if step > 0 and step % 10 == 0 and self.config["global_rank"] == 0:
                 self.log_training(self.current_epoch,
                                   step,
                                   self.global_step,
@@ -657,6 +748,8 @@ class SynthesisTask():
                 self.logger.info("Epoch finished, average losses: ")
                 for v in self.train_losses.values():
                     self.logger.info("    {}".format(v))
-        # if(self.config["global_rank"] == 0):
-        #     self.run_eval(val_data_loader)
+        # if self.config["global_rank"] == 0 \
+        #             and self.global_step >= 0 \
+        #             and (self.global_step == 2000 or (self.global_step % self.config["training.eval_interval"] == 0)):
+        #         self.run_eval(val_data_loader)
 

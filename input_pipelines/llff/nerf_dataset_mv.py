@@ -16,16 +16,16 @@ def _collate_fn(batch):
     _src_items, _tgt_items = zip(*batch)
 
     # Gather and stack tgt infos
-    tgt_items = defaultdict(list)
-    for si in _tgt_items:
+    src_items = defaultdict(list)
+    for si in _src_items:
         for k, v in si.items():
-            tgt_items[k].append(default_collate(v))
+            src_items[k].append(default_collate(v))
 
-    for k in tgt_items.keys():
-        tgt_items[k] = torch.stack(tgt_items[k], axis=0)
+    for k in src_items.keys():
+        src_items[k] = torch.stack(src_items[k], axis=0)
 
-    src_items = default_collate(_src_items)
-    src_items = {k: v for k, v in src_items.items()
+    tgt_items = default_collate(_tgt_items)
+    tgt_items = {k: v for k, v in tgt_items.items()
                  if k != "G_cam_world"}
     return src_items, tgt_items
 
@@ -39,10 +39,11 @@ class NeRFDataset(data.Dataset):
         self.img_h = img_size[1]
         self.is_validation = is_validation
         self.visible_points_count = visible_points_count
+        self.num_src_views = config["data.num_src_views"]
         self.supervision_count = supervision_count
         self.collate_fn = _collate_fn
         self._init_img_transforms()
-        # self.val_classes= ["flower"]
+        # self.val_classes= ["fortress"]
         # use pre_downsampled image data
         if img_pre_downsample_ratio is None or img_pre_downsample_ratio <= 1:
             image_folder = "images"
@@ -54,7 +55,7 @@ class NeRFDataset(data.Dataset):
 
         # Read data
         self.dataset_infos = defaultdict(dict)
-        self.scene_to_indices = defaultdict(set)
+        self.scene_to_indices = defaultdict(list)
         self.keys = []
         self.imgs = []
         index = 0
@@ -74,8 +75,9 @@ class NeRFDataset(data.Dataset):
             # Parse colmap results
             for img_id, img_item in images.items():
                 img_path = os.path.join(scene_dir, image_folder, img_item.name)
-
+                
                 if not os.path.exists(img_path):
+                    
                     continue
 
                 qvec = img_item.qvec
@@ -87,7 +89,7 @@ class NeRFDataset(data.Dataset):
                 img = self.img_transforms(img)
 
                 # Gather info globally for random access via index
-                self.scene_to_indices[scene_name].add(index)
+                self.scene_to_indices[scene_name].append(index)
                 self.keys.append((scene_name, img_path))
 
                 # Construct each data object
@@ -102,35 +104,69 @@ class NeRFDataset(data.Dataset):
                 )
                 assert len(xyzs) >= visible_points_count
                 index += 1
-
+            # print(self.scene_to_indices[scene_name])
         self.length = len(self.keys)
         if self.logger:
             self.logger.info("Dataset root: {}, is_validation: {}, number of images: {}"
                              .format(root, self.is_validation, self.length))
-
+        
     def __getitem__(self, index):
         # Read src item
         scene_name, img_path = self.keys[index]
-        _src_item = self.dataset_infos[scene_name][img_path]
-
+        
+        scene_indices = [i for i in self.scene_to_indices[scene_name] if i != index]
+        
+        src_ids = random.sample(scene_indices,min(self.num_src_views,len(scene_indices)))
+        tgt_id = random.sample(src_ids,1)[0]
+        src_ids.append(index)
+        src_ids.remove(tgt_id)
+        
+        all_src_items = defaultdict(list)
+        _, img_path_tgt = self.keys[tgt_id]
+        img_info_tgt = self.dataset_infos[scene_name][img_path_tgt]
         # Copy new src_item
-        src_item = {k: v for k, v in _src_item.items()}
+        
+        G_tgt_world = img_info_tgt["G_cam_world"]
+        for index in src_ids:
+            _, img_path = self.keys[index]
+            img_info = self.dataset_infos[scene_name][img_path]
 
-        # Read tgt items:
-        tgt_items = self._sample_tgt_items(index, src_item)
+            G_src_world = img_info["G_cam_world"]
+            
+            G_src_tgt = G_src_world @ np.linalg.inv(G_tgt_world)
 
-        # Sample 3D points in src items
-        # TODO: deterministic behavior in val
-        sampled_indices = random.sample(range(len(_src_item["xyzs_ids"])),
+            all_src_items["img"].append(img_info["img"])
+            all_src_items["K"].append(img_info["K"])
+            all_src_items["K_inv"].append(img_info["K_inv"])
+            all_src_items["G_src_tgt"].append(G_src_tgt)
+
+            # Sample xyz points
+            # TODO: deterministic behavior in val
+            # sampled_xyzs_indices = random.sample(range(len(img_info["xyzs_ids"])),
+            #                                      self.visible_points_count) \
+            #     if not self.is_validation \
+            #     else sorted(range(len(img_info["xyzs_ids"]))[:256])
+            sampled_xyzs_indices = random.sample(range(len(img_info["xyzs_ids"])),
+                                                 self.visible_points_count)
+            all_src_items["xyzs"].append(img_info["xyzs"][:, sampled_xyzs_indices])
+            all_src_items["xyzs_ids"].append(img_info["xyzs_ids"][sampled_xyzs_indices])
+            all_src_items["depths"].append(img_info["depths"][sampled_xyzs_indices])
+        
+        tgt_item = {k: v for k, v in img_info_tgt.items()}
+        sampled_indices = random.sample(range(len(img_info_tgt["xyzs_ids"])),
                                         self.visible_points_count)
         # sampled_indices = random.sample(range(len(_src_item["xyzs_ids"])),
         #                                 self.visible_points_count) \
         #     if not self.is_validation \
         #     else sorted(range(len(_src_item["xyzs_ids"])))[:256]
-        src_item["xyzs"] = src_item["xyzs"][:, sampled_indices]
-        src_item["xyzs_ids"] = src_item["xyzs_ids"][sampled_indices]
-        src_item["depths"] = src_item["depths"][sampled_indices]
-        return src_item, tgt_items
+        tgt_item["xyzs"] = tgt_item["xyzs"][:, sampled_indices]
+        tgt_item["xyzs_ids"] = tgt_item["xyzs_ids"][sampled_indices]
+        tgt_item["depths"] = tgt_item["depths"][sampled_indices]
+        # Copy new src_item
+        
+
+       
+        return all_src_items, tgt_item
 
     def __len__(self):
         return self.length
@@ -200,57 +236,22 @@ class NeRFDataset(data.Dataset):
         _info["depths"] = depths
         return _info
 
-    def _sample_tgt_items(self, src_idx, src_item):
-        G_src_world = src_item["G_cam_world"]
-        scene_name, _ = self.keys[src_idx]
-
-        # randomly sample K items for supervision, excluding the src_idx
-        scene_indices = [i for i in self.scene_to_indices[scene_name] if i != src_idx]
-        if not self.is_validation:
-            sampled_indices = random.sample(scene_indices, self.supervision_count)
-        else:
-            sampled_indices = [scene_indices[(src_idx + 1) % (len(scene_indices)) - 1]]
-
-        # Generate sampled_items and calculate the relative rotation matrix and translation vector
-        # accordingly.
-        sampled_items = defaultdict(list)
-        for index in sampled_indices:
-            _, img_path = self.keys[index]
-            img_info = self.dataset_infos[scene_name][img_path]
-
-            G_tgt_world = img_info["G_cam_world"]
-            G_src_tgt = G_src_world @ np.linalg.inv(G_tgt_world)
-
-            sampled_items["img"].append(img_info["img"])
-            sampled_items["K"].append(img_info["K"])
-            sampled_items["K_inv"].append(img_info["K_inv"])
-            sampled_items["G_src_tgt"].append(G_src_tgt)
-
-            # Sample xyz points
-            # TODO: deterministic behavior in val
-            # sampled_xyzs_indices = random.sample(range(len(img_info["xyzs_ids"])),
-            #                                      self.visible_points_count) \
-            #     if not self.is_validation \
-            #     else sorted(range(len(img_info["xyzs_ids"]))[:256])
-            sampled_xyzs_indices = random.sample(range(len(img_info["xyzs_ids"])),
-                                                 self.visible_points_count)
-            sampled_items["xyzs"].append(img_info["xyzs"][:, sampled_xyzs_indices])
-            sampled_items["xyzs_ids"].append(img_info["xyzs_ids"][sampled_xyzs_indices])
-            sampled_items["depths"].append(img_info["depths"][sampled_xyzs_indices])
-        return sampled_items
+    
 
 
 if __name__ == "__main__":
     import logging
+    
     dataset = NeRFDataset({}, logging,
                           root="/home/yafathi/projects/def-karray/yafathi/MINE/nerf_llff_data",
                           is_validation=False,
                           img_size=(384, 256),
                           supervision_count=1,
+                          colmap_utils=colmap_utils,
                           img_pre_downsample_ratio=7.875)
     from torch.utils.data import DataLoader
 
-    dl = DataLoader(dataset, batch_size=4, shuffle=False,
+    dl = DataLoader(dataset, batch_size=1, shuffle=False,
                     drop_last=True, num_workers=0,
                     collate_fn=_collate_fn)
 

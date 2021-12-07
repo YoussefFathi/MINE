@@ -38,6 +38,7 @@ def _get_disparity_list(config, B, device=torch.device("cuda:0")):
                 dtype=torch.float32, device=device
             ).unsqueeze(0).repeat(B, 1)  # BxS
         else:
+            # print("FIXED")
             disparity_coarse_src = torch.linspace(
                 disparity_start, disparity_end, S_coarse, dtype=torch.float32,
                 device=device
@@ -65,7 +66,7 @@ class SynthesisTask():
         self.embedder, out_dim = get_embedder(config["model.pos_encoding_multires"])
 
         # Init model
-        self.backbone = ResnetEncoder(num_layers=50,
+        self.backbone = ResnetEncoder(num_layers=18,
                                       pretrained=config.get("model.imagenet_pretrained", True)).to(device=torch.device("cuda:0"))
         self.decoder = DepthDecoder(
             # Common params
@@ -234,7 +235,7 @@ class SynthesisTask():
         src_imgs_scaled = self.upsample_list[scale](self.src_imgs)
         tgt_imgs_scaled = self.upsample_list[scale](self.tgt_imgs)
         B, _, H_img_scaled, W_img_scaled = src_imgs_scaled.size()
-
+        # self.logger.info(str(self.K_src.size())+"SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
         K_src_scaled = self.K_src / (2 ** scale)
         K_src_scaled[:, 2, 2] = 1
         K_tgt_scaled = self.K_tgt / (2 ** scale)
@@ -324,7 +325,7 @@ class SynthesisTask():
         # 2. rgb loss at tgt frame
         # some pixels in tgt frame is outside src FoV, here we can detect and ignore those pixels
         rgb_tgt_valid_mask = torch.ge(tgt_mask_syn, self.config["mpi.valid_mask_threshold"]).to(torch.float32)
-        loss_map = torch.abs(tgt_imgs_syn - tgt_imgs_scaled) * rgb_tgt_valid_mask
+        loss_map = torch.abs(tgt_imgs_syn - tgt_imgs_scaled) #* rgb_tgt_valid_mask
         loss_rgb_tgt = loss_map.mean()
 
         # Edge aware smoothless losses
@@ -659,6 +660,7 @@ class SynthesisTask():
                                    self.config["hdfs_workspace"]], self.logger)
 
     def train(self, train_data_loader, val_data_loader):
+        print(f"FIXED DISPARTY: {self.config.get('mpi.fix_disparity')}")
         for epoch in range(1, self.config["training.epochs"] + 1):
             self.current_epoch = epoch
             self.train_epoch(train_data_loader, val_data_loader, epoch)

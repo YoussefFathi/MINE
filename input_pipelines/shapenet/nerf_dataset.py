@@ -18,7 +18,7 @@ def get_image_to_tensor_balanced(image_size=0):
     if image_size > 0:
         ops.append(transforms.Resize(image_size))
     ops.extend(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),]
+        [transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),]
     )
     return transforms.Compose(ops)
 
@@ -165,9 +165,12 @@ class NeRFDataset(data.Dataset):
        
 
         focal=None
+       
         img = Image.open(img_dir)
         # img.save(f"src_{index}.jpg")
-        
+        x_scale = img.size[0] / 2.0
+        y_scale = img.size[1] / 2.0
+        xy_delta = 1.0
         
         # ShapeNet
         wmat_inv_key = "world_mat_inv_" + str(i)
@@ -181,6 +184,8 @@ class NeRFDataset(data.Dataset):
             extr_inv_mtx = np.linalg.inv(extr_inv_mtx)
         extr_mtx =  all_cam[wmat_key]
         intr_mtx = all_cam["camera_mat_" + str(i)][:3,:3]
+        intr_mtx[0,0] *= x_scale
+        intr_mtx[1,1] *= y_scale
         intr_mtx = resize_instrinsic(intr_mtx,2,2)
         intr_mtx_inv = np.linalg.inv(intr_mtx)[:3,:3]
         # fx, fy = intr_mtx[0, 0], intr_mtx[1, 1]
@@ -278,8 +283,10 @@ class NeRFDataset(data.Dataset):
             if tgt_extr_inv_mtx.shape[0] == 3:
                 tgt_extr_inv_mtx = np.vstack((tgt_extr_inv_mtx, np.array([0, 0, 0, 1])))
             tgt_extr_inv_mtx = np.linalg.inv(tgt_extr_inv_mtx)
-        extr_mtx=  all_cam[wmat_key]
+        tgt_extr_mtx=  all_cam[wmat_key]
         tgt_intr_mtx = all_cam["camera_mat_" + str(tgt_i)][:3,:3]
+        tgt_intr_mtx[0,0] *= x_scale
+        tgt_intr_mtx[1,1] *= y_scale
         tgt_intr_mtx = resize_instrinsic(tgt_intr_mtx,2,2)
         tgt_intr_mtx_inv = np.linalg.inv(tgt_intr_mtx)[:3,:3]
         # fx, fy = intr_mtx[0, 0], intr_mtx[1, 1]
@@ -298,13 +305,13 @@ class NeRFDataset(data.Dataset):
         )
         G_tgt_world = pose
         tgt_img_tensor = self.image_to_tensor(tgt_image)
-        print(G_src_world,"SRC")
-        print(G_tgt_world,"TGT")
+        # print(G_src_world,"SRC")
+        # print(G_tgt_world,"TGT")
         G_src_tgt = G_src_world @ np.linalg.inv(G_tgt_world)
         tgt_item = {
             "img":tgt_img_tensor,
-            "K":intr_mtx,
-            "K_inv":intr_mtx_inv,
+            "K":tgt_intr_mtx,
+            "K_inv":tgt_intr_mtx_inv,
             "G_src_tgt":G_src_tgt
         }
         # Read tgt items:
@@ -411,11 +418,13 @@ if __name__ == "__main__":
         src_item, supervision_items = batch
 
         for k, v in src_item.items():
-            print(k, v.size())
+            if(k!="img"):
+                print(k, v)
 
         print("********")
 
         for k, v in supervision_items.items():
-            print(k, v.size())
+            if(k!="img"):
+                print(k, v)
 
         break

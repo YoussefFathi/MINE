@@ -2,7 +2,7 @@
 #SBATCH --gres=gpu:v100l:4      # Request GPU "generic resources"
 #SBATCH --cpus-per-task=8  # Cores proportional to GPUs: 6 on Cedar, 16 on Graham.
 #SBATCH --mem=32G      # Memory proportional to GPUs: 32000 Cedar, 64000 Graham.
-#SBATCH --time=1-12:00
+#SBATCH --time=1-00:00
 #SBATCH --output=/project/def-karray/yafathi/MINE/sbatch_output/MINE_%N-%j.out
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export NCCL_BLOCKING_WAIT=0  #Set this environment variable if you wish to use the NCCL backend for inter-GPU communication.

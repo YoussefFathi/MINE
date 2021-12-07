@@ -23,7 +23,8 @@ def run_shell_cmd(args_list, logger):
     """
     if logger:
         logger.info("Running system command: {0}".format(" ".join(args_list)))
-    proc = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+        args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     s_output, s_err = proc.communicate()
     s_return = proc.returncode
     return s_return, s_output, s_err
@@ -31,7 +32,8 @@ def run_shell_cmd(args_list, logger):
 
 def run_shell_cmd_shell(cmd, logger):
     logger.info("Running system command: {0}".format(cmd))
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     s_output, s_err = proc.communicate()
     s_return = proc.returncode
     return s_return, s_output, s_err
@@ -44,7 +46,8 @@ def restore_model(model_path, backbone, decoder, optimizer, logger):
         return
 
     assert os.path.exists(model_path), "Model %s does not exist!"
-    state_dict = torch.load(model_path, map_location=lambda storage, loc: storage.cpu())
+    state_dict = torch.load(
+        model_path, map_location=lambda storage, loc: storage.cpu())
 
     for key, model in [("backbone", backbone), ("decoder", decoder), ("optimizer", optimizer)]:
         if key not in state_dict:
@@ -54,12 +57,16 @@ def restore_model(model_path, backbone, decoder, optimizer, logger):
                        for k, v in state_dict[key].items()}
 
         # Check if there is key mismatch:
-        missing_in_model = set(_state_dict.keys()) - set(model.state_dict().keys())
-        missing_in_ckp = set(model.state_dict().keys()) - set(_state_dict.keys())
+        missing_in_model = set(_state_dict.keys()) - \
+            set(model.state_dict().keys())
+        missing_in_ckp = set(model.state_dict().keys()) - \
+            set(_state_dict.keys())
 
         if logger:
-            logger.info("[MODEL_RESTORE] missing keys in %s checkpoint: %s" % (key, missing_in_ckp))
-            logger.info("[MODEL_RESTORE] missing keys in %s model: %s" % (key, missing_in_model))
+            logger.info("[MODEL_RESTORE] missing keys in %s checkpoint: %s" % (
+                key, missing_in_ckp))
+            logger.info("[MODEL_RESTORE] missing keys in %s model: %s" %
+                        (key, missing_in_model))
 
         if key != "optimizer":
             model.load_state_dict(_state_dict, strict=False)
@@ -83,12 +90,14 @@ def linspace_batch(start, end, steps, dtype=None, device=None):
     assert isinstance(steps, int)
 
     B, S = start.size(0), steps
-    x = torch.linspace(start[0], end[0], steps=S, dtype=dtype, device=device)  # S
+    x = torch.linspace(start[0], end[0], steps=S,
+                       dtype=dtype, device=device)  # S
     x = x.unsqueeze(0).repeat(B, 1)  # BxS
 
     x0 = torch.full((B, S), fill_value=start[0], dtype=dtype, device=device)
     x1 = torch.full((B, S), fill_value=end[0], dtype=dtype, device=device)
-    linear_arr = (end-start).unsqueeze(1) * (x - x0) / (x1 - x0) + start.unsqueeze(1)
+    linear_arr = (end-start).unsqueeze(1) * (x - x0) / \
+        (x1 - x0) + start.unsqueeze(1)
 
     return linear_arr
 
@@ -119,6 +128,7 @@ def inverse(matrices):
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self, name, fmt=":f"):
         self.name = name
         self.fmt = fmt
@@ -165,7 +175,8 @@ class Embedder(object):
 
         for freq in freq_bands:
             for p_fn in self.kwargs["periodic_fns"]:
-                embed_fns.append(lambda x, p_fn=p_fn, freq=freq: p_fn(x * freq))
+                embed_fns.append(lambda x, p_fn=p_fn,
+                                 freq=freq: p_fn(x * freq))
                 out_dim += d
 
         self.embed_fns = embed_fns
@@ -177,12 +188,12 @@ class Embedder(object):
 
 def get_embedder(multires, i=0):
     embed_kwargs = {
-                "include_input": True,
-                "input_dims": 1,
-                "max_freq_log2": multires - 1,
-                "num_freqs": multires,
-                "log_sampling": True,
-                "periodic_fns": [torch.sin, torch.cos],
+        "include_input": True,
+        "input_dims": 1,
+        "max_freq_log2": multires - 1,
+        "num_freqs": multires,
+        "log_sampling": True,
+        "periodic_fns": [torch.sin, torch.cos],
     }
 
     embedder_obj = Embedder(**embed_kwargs)

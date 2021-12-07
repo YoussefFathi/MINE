@@ -73,7 +73,7 @@ exec python3 -m torch.distributed.launch \
     --master_port $MASTER_PORT \
     --nnodes $N_NODES \
     --nproc_per_node $GPUS_PER_NODE \
-    --node_rank $NODE_RANK train.py \
+    --node_rank $NODE_RANK train_mv.py \
     --config_path $DEFAULT_PARAMS \
     --workspace $WORKSPACE --version $VERSION \
     --extra_config "$EXTRA_CONFIG"
