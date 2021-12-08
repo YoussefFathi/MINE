@@ -13,7 +13,7 @@ All of our experiments were implemented on a cloud compute cluster using Slurm w
 We downloaded the dataset using the script "raw_data_downloader.sh". This script should be placed in the directory where the data will be placed and ran from there.
 
 ### Dataloader
-The original MINE paper didn't include code for the dataloader of KITTI Raw dataset, so we had to create one ourselves following the class structure defined in the given sample dataloader published for LLFF dataset in "input_pipelines/llff/nerf_dataset.py". Our data loader could be found in "input_pipelines/kitti_raw/nerf_dataset.py". To create the loader we followed the steps made by Tulisiani et al. in their code [here](https://github.com/google/layered-scene-inference/blob/59b5d37022f6aaab30dfd4ddcf560923eaf38578/lsi/data/kitti/data.py#L161), which includes the following steps:
+The original MINE paper didn't include code for the dataloader of KITTI Raw dataset, so we had to create one ourselves following the class structure defined in the given sample dataloader published for LLFF dataset in "input_pipelines/llff/nerf_dataset.py". Our data loader could be found in "input_pipelines/kitti_raw/nerf_dataset.py". To create the loader we followed the steps made by Tulsiani et al. in their code [here](https://github.com/google/layered-scene-inference/blob/59b5d37022f6aaab30dfd4ddcf560923eaf38578/lsi/data/kitti/data.py#L161), which includes the following steps:
 
  - Loading the correct training and test sequences for fair comparison (init_img_names_seq_list() function)
  - Preprocessing the given camera intrinsics and extrinsics for both the source and target views. ( read_calib_file() and get_data() )
