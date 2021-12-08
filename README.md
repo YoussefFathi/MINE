@@ -94,3 +94,7 @@ We created a new custom multi view dataloader for the LLFF dataset in "input_pip
 				 -  Fuse the estimated target MPIs using **naive averaging method**. Other fusing methods will be implemented in this part as future work.
 				 - Use render() to render the final target rgb image .
 		 - Calculate the target view losses and add them to the final loss of the network.
+
+Created "train_mv.py" to load the new dataloader and training pipeline of multi-view MINE.
+
+To run the training use "sbatch_start_multi_view_train_llff .sh"
