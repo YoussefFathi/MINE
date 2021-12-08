@@ -10,7 +10,7 @@ All of our experiments were implemented on a cloud compute cluster using Slurm w
 ## Reproducibility on KITTI Raw
 
 ### Downloading the dataset
-We downloaded the dataset using the script "raw_data_downloader.sh". This script should be placed in the directory where the data will be placed an ran from there.
+We downloaded the dataset using the script "raw_data_downloader.sh". This script should be placed in the directory where the data will be placed and ran from there.
 
 ### Dataloader
 The original MINE paper didn't include code for the dataloader of KITTI Raw dataset, so we had to create one ourselves following the class structure defined in the given sample dataloader published for LLFF dataset in "input_pipelines/llff/nerf_dataset.py". Our data loader could be found in "input_pipelines/kitti_raw/nerf_dataset.py". To create the loader we followed the steps made by Tulisiani et al. in their code here (add link), which includes the following steps:
@@ -40,7 +40,7 @@ https://s3.eu-central-1.amazonaws.com/avg-projects/differentiable_volumetric_ren
 ### DataLoader
 Similar to KITTI Raw, we create our own dataloader found in "input_pipelines/shapenet/nerf_dataset.py". We follow the same approach of pixelNeRF in loading the data and apply the same preprocessing steps for a fair comparison. Our main contributions in this script are:
 
- - Loading the source and image way in a way that fits MINE (since pixelNeRF deals with image pixels in the forms of rays, while MINE deals with the images as a whole). In \_\_init\_\_() for each view in an object ina category, we randomly sample another view of the same object to act as the target view for supervising MINE.
+ - Loading the source and image way in a way that fits MINE (since pixelNeRF deals with image pixels in the forms of rays, while MINE deals with the images as a whole). In \_\_init\_\_() for each view in an object in a category, we randomly sample another view of the same object to act as the target view for supervising MINE.
  - Apply the same preporcessing on camera intrinsics and extrinsics as pixelNERF in ( \_\_getitem\_\_() )
 ### Training Pipeline
  -   Added the code for loading shapenet in "train.py"
@@ -71,7 +71,7 @@ We created a new custom multi view dataloader for the LLFF dataset in "input_pip
  - We generate a sample for each view present in each of our 8 scenes in the dataset. On average, each scene contains 20-50 views. 
  - We sort the views that are present in a certain scene by their sequence number.
  - For each view of a scene, we randomly sample N+1 views that lie after this view in the sorted list (views that have higher sequence number) to act as source views. We then randomly assign one of the N+1 views as the target view. This assures us that there would be no duplicate source/target view pairs seen during training.
- - Same preporcessing steps done for the LLFF dataset.
+ - Same preprocessing steps done for the LLFF dataset.
  - Adjusted the collate function to batch the source views in a proper way to be loaded in the network
 ### Training Pipeline
  - Created "synthesis_task_mv.py" to include the updated architecture of multi-view MINE.
@@ -92,7 +92,7 @@ We created a new custom multi view dataloader for the LLFF dataset in "input_pip
 			 - Use mpi_rendering.render_tgt_rgb_depth_mv() to:
 				 -  Render the new view by applying homography warping on each source view to map it to the target view.
 				 -  Fuse the estimated target MPIs using **naive averaging method**. Other fusing methods will be implemented in this part as future work.
-				 - Use render() to render the final target rgb image .
+				 - Use render() to render the final target rgb image.
 		 - Calculate the target view losses and add them to the final loss of the network.
 
 Created "train_mv.py" to load the new dataloader and training pipeline of multi-view MINE.
