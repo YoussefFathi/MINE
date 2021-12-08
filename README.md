@@ -74,6 +74,23 @@ We created a new custom multi view dataloader for the LLFF dataset in "input_pip
  - Same preporcessing steps done for the LLFF dataset.
  - Adjusted the collate function to batch the source views in a proper way to be loaded in the network
 ### Training Pipeline
- - List item
-
-Run th
+ - Created "synthesis_task_mv.py" to include the updated architecture of multi-view MINE.
+	 - Changed init_data() and set_data() to fit with the new dimensionality of source views.
+	 - The function network_forward() is responsible for generating the source view MPIs. We allow the network to iteratively pass each source view image through the encoder-decoder models to produce the per-view MPI using the mpi_predictor() function. We stack all the source MPIs in a list.
+	 - The estimated MPIs are returned to the function loss_fcn() which is responsible for calculating the loss of the network for each scale using loss_fcn_per_scale().
+	 - In loss_fcn_per_scale():
+		 - For each source MPI:
+			 - We scale all the source and target images and camera parameters to fit with the current needed scale.
+			 - Generate the 3D mesh grid for each source view to be used in volumetric rendering using mpi_rendering.get_src_xyz_from_plane_disparity().
+			 - Use mpi_rendering.render() to render the synthesized RGB and Disparity maps for each source view using the predicted MPIs and 3D mesh grid.
+			 - Use the 3D sparse point cloud estimated using COLMAP to calculate the scale
+		 -  Calculate the sparse disparity loss, source L1 loss, source SSIM loss.
+	 - Sum all the losses of the source views and add them to the final loss of the network
+	 - For the target view:
+		 - Use our new function render_novel_view_from_mv() to do the following:
+			 - Given the different source MPIs and their poses along with the target view pose,  we generate 3D mesh grid that defines the warped 3D points of the target view with respect to each source view
+			 - Use mpi_rendering.render_tgt_rgb_depth_mv() to:
+				 -  Render the new view by applying homography warping on each source view to map it to the target view.
+				 -  Fuse the estimated target MPIs using **naive averaging method**. Other fusing methods will be implemented in this part as future work.
+				 - Use render() to render the final target rgb image .
+		 - Calculate the target view losses and add them to the final loss of the network.
