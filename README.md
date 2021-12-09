@@ -98,3 +98,9 @@ We created a new custom multi view dataloader for the LLFF dataset in "input_pip
 Created "train_mv.py" to load the new dataloader and training pipeline of multi-view MINE.
 
 To run the training use "sbatch_start_multi_view_train_llff .sh"
+
+## Efficiency Experiment
+
+In this experiment we included only the script we adjusted to evaluate the speed of MINE which is "image_time_testing.py". The script is considered an adjusted version of the original "image_to_video.py".
+
+The script in pixelNeRF would require adding the whole code of the network in this repo to be useable which was not applicable in our case.
