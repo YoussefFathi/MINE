@@ -104,3 +104,5 @@ To run the training use "sbatch_start_multi_view_train_llff .sh"
 In this experiment we included only the script we adjusted to evaluate the speed of MINE which is "image_time_testing.py". The script is considered an adjusted version of the original "image_to_video.py".
 
 The script in pixelNeRF would require adding the whole code of the network in this repo to be useable which was not applicable in our case.
+
+** Note: It was noticed that the LPIPS score calculation in the published code has a bug. Images given to the predefined LPIPS function should have values in range [-1,1] while the code is passing images with values in range [0,1] **
